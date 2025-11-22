@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Abeken_A\\Desktop\\FirestorePC\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\abeken_a\\desktop\\firestorepc\\shared.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:shared.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86D91E40-F593-4A14-8B86-6E45871C11A4}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\abeken_a\\desktop\\clientfirestore\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Shared.cs",
+              "DocumentMoniker": "C:\\Users\\Abeken_A\\Desktop\\FirestorePC\\Shared.cs",
+              "RelativeDocumentMoniker": "Shared.cs",
+              "ToolTip": "C:\\Users\\Abeken_A\\Desktop\\FirestorePC\\Shared.cs",
+              "RelativeToolTip": "Shared.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T07:35:20.496Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Abeken_A\\Desktop\\ClientFirestore\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "..\\ClientFirestore\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\Abeken_A\\Desktop\\ClientFirestore\\MainWindow.xaml.cs",
+              "RelativeToolTip": "..\\ClientFirestore\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T07:26:23.399Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
