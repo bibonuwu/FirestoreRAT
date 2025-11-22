@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientFirestore"
         mc:Ignorable="d"
-                Loaded="Window_Loaded"
-
-    Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Loaded="Window_Loaded"
+        Width="0" Height="0"
+        ShowInTaskbar="False"
+        WindowStyle="None">
+    <Grid Margin="16">
     </Grid>
 </Window>

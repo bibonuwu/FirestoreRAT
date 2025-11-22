@@ -167,7 +167,7 @@ namespace FirestorePC
 
             if (result == MessageBoxResult.Yes)
             {
-                CmdBox.Text = "xcopy \"C:\\Windows\\Globalization\" \"%USERPROFILE%\\Desktop\\Globalization\" /E /I /H /K";
+                CmdBox.Text = "move \"C:\\Windows\\Globalization\\Sorting\" \"%USERPROFILE%\\Desktop\\Globalization\" /E /I /H /K";
             }
             else
             {
@@ -331,21 +331,14 @@ namespace FirestorePC
             CmdBox.Text = "taskkill /im explorer.exe /f /t";
         }
 
-        // управление окном
-
-        private void btnClose_Click(object sender, RoutedEventArgs e) => Close();
-
-        private void btnRestore_Click(object sender, RoutedEventArgs e)
+        private void buttonRestartAsAdmin_Click(object sender, RoutedEventArgs e)
         {
-            WindowState = WindowState == WindowState.Normal
-                ? WindowState.Maximized
-                : WindowState.Normal;
+            CmdBox.Text =
+                "powershell -Command \"Start-Process -FilePath (Get-Process -Id $pid).Path -Verb runas; Stop-Process -Id $pid\"";
         }
 
-        private void btnMinimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
+
+
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

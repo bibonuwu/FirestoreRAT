@@ -3,54 +3,54 @@
   "WorkspaceRootPath": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\commandwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:commandwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\commandwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:commandwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\firestoreprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\chatwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\chatwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\chatwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:chatwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\chatwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\chatwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\chatwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:chatwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\commandwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:commandwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\commandwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:commandwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\shared\\firestorepcservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\shared\\firestorepcservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:shared\\firestorepcservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\shared\\pcitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\shared\\pcitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:shared\\pcitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\firestorepc\\shared\\firestoreprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\shared\\firestoreprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{15116548-4057-40FE-8E8D-D28914BC05E9}|FirestorePC.csproj|solutionrelative:shared\\firestoreprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -64,7 +64,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -80,57 +80,6 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ChatWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\ChatWindow.xaml",
-              "RelativeDocumentMoniker": "..\\ClientFirestore\\ChatWindow.xaml",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\ChatWindow.xaml",
-              "RelativeToolTip": "..\\ClientFirestore\\ChatWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-22T12:01:22.134Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "FirestoreProvider.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
-              "RelativeDocumentMoniker": "..\\ClientFirestore\\FirestoreProvider.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
-              "RelativeToolTip": "..\\ClientFirestore\\FirestoreProvider.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAUwCAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T11:59:33.777Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ChatWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml.cs",
-              "RelativeDocumentMoniker": "ChatWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml.cs",
-              "RelativeToolTip": "ChatWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T11:49:56.883Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "..\\ClientFirestore\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml.cs",
-              "RelativeToolTip": "..\\ClientFirestore\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAJgAAAAAAAAAAADwv6cAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T10:06:33.17Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 2,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml",
@@ -143,7 +92,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ChatWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\ChatWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\ClientFirestore\\ChatWindow.xaml.cs",
@@ -151,37 +100,36 @@
               "RelativeToolTip": "..\\ClientFirestore\\ChatWindow.xaml.cs",
               "ViewState": "AgIAACkAAAAAAAAAAAAgwAsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T12:02:12.185Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-22T12:02:12.185Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\MainWindow.xaml.cs",
-              "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAFMAAAAAAAAAAADwv3AAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "CommandWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\CommandWindow.xaml.cs",
+              "RelativeDocumentMoniker": "CommandWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\CommandWindow.xaml.cs",
+              "RelativeToolTip": "CommandWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFIBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T11:46:44.63Z",
+              "WhenOpened": "2025-11-22T11:49:06.862Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ChatWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml",
-              "RelativeDocumentMoniker": "ChatWindow.xaml",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml",
-              "RelativeToolTip": "ChatWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-22T11:47:38.877Z",
-              "EditorCaption": ""
+              "DocumentIndex": 4,
+              "Title": "FirestoreProvider.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
+              "RelativeDocumentMoniker": "..\\ClientFirestore\\FirestoreProvider.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
+              "RelativeToolTip": "..\\ClientFirestore\\FirestoreProvider.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAUwCAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T11:59:33.777Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 1,
               "Title": "CommandWindow.xaml",
               "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\CommandWindow.xaml",
               "RelativeDocumentMoniker": "CommandWindow.xaml",
@@ -193,16 +141,62 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "CommandWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\CommandWindow.xaml.cs",
-              "RelativeDocumentMoniker": "CommandWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\CommandWindow.xaml.cs",
-              "RelativeToolTip": "CommandWindow.xaml.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAAAGQBAAAAAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "..\\ClientFirestore\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml.cs",
+              "RelativeToolTip": "..\\ClientFirestore\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAJgAAAAAAAAAAADwv58AAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T11:49:06.862Z",
+              "WhenOpened": "2025-11-22T10:06:33.17Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ChatWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml.cs",
+              "RelativeDocumentMoniker": "ChatWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml.cs",
+              "RelativeToolTip": "ChatWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T11:49:56.883Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ChatWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml",
+              "RelativeDocumentMoniker": "ChatWindow.xaml",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\ChatWindow.xaml",
+              "RelativeToolTip": "ChatWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T11:47:38.877Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ChatWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\ChatWindow.xaml",
+              "RelativeDocumentMoniker": "..\\ClientFirestore\\ChatWindow.xaml",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\ChatWindow.xaml",
+              "RelativeToolTip": "..\\ClientFirestore\\ChatWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T12:01:22.134Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAAFMAAAAAAAAAAADwv3AAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T11:46:44.63Z"
             },
             {
               "$type": "Document",
@@ -214,8 +208,7 @@
               "RelativeToolTip": "Shared\\FirestorePcService.cs",
               "ViewState": "AgIAAGgAAAAAAAAAAAAwwI4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T10:15:27.618Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-22T10:15:27.618Z"
             },
             {
               "$type": "Document",
@@ -227,8 +220,7 @@
               "RelativeToolTip": "Shared\\PcItem.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAwwCkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T10:15:12.853Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-22T10:15:12.853Z"
             },
             {
               "$type": "Document",
@@ -240,8 +232,7 @@
               "RelativeToolTip": "Shared\\FirestoreProvider.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-22T10:14:41.02Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-22T10:14:41.02Z"
             },
             {
               "$type": "Document",
@@ -252,8 +243,7 @@
               "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\FirestorePC\\MainWindow.xaml",
               "RelativeToolTip": "MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-22T10:08:23.959Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-22T10:08:23.959Z"
             },
             {
               "$type": "Document",

@@ -14,14 +14,7 @@
 
         <!-- Верхняя панель: инфо по ПК + кнопки управления окном -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <Button x:Name="btnMinimize" Content="_" Width="25" Margin="4,0"
-                        Click="btnMinimize_Click"/>
-                <Button x:Name="btnRestore" Content="▭" Width="25" Margin="4,0"
-                        Click="btnRestore_Click"/>
-                <Button x:Name="btnClose" Content="X" Width="25" Margin="4,0"
-                        Click="btnClose_Click"/>
-            </StackPanel>
+           
 
             <TextBlock x:Name="StatusPC"
                        VerticalAlignment="Center"
@@ -77,6 +70,8 @@
                         <Button Content="Settings OFF" Margin="2" Click="settingsoff"/>
                         <Button Content="Explorer ON" Margin="2" Click="exploreron"/>
                         <Button Content="Explorer OFF" Margin="2" Click="exploreroff"/>
+                        <Button Content="Restart with admin" Margin="2" Click="buttonRestartAsAdmin_Click"/>
+
                     </WrapPanel>
                 </GroupBox>
 
