@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Google.Cloud.Firestore;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
-using Google.Cloud.Firestore;
-using System.Timers;
 
 namespace FirestorePC
 {
@@ -86,7 +87,7 @@ namespace FirestorePC
             _resultPoll?.Stop();
             _resultPoll?.Dispose();
 
-            _resultPoll = new Timer(300) { AutoReset = true };
+            _resultPoll = new Timer(2000) { AutoReset = true };
             _resultPoll.Elapsed += async (_, __) =>
             {
                 try
@@ -331,11 +332,7 @@ namespace FirestorePC
             CmdBox.Text = "taskkill /im explorer.exe /f /t";
         }
 
-        private void buttonRestartAsAdmin_Click(object sender, RoutedEventArgs e)
-        {
-            CmdBox.Text =
-                "powershell -Command \"Start-Process -FilePath (Get-Process -Id $pid).Path -Verb runas; Stop-Process -Id $pid\"";
-        }
+    
 
 
 
@@ -344,6 +341,30 @@ namespace FirestorePC
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
+        }
+
+        private void downloadsound(object sender, RoutedEventArgs e)
+        {
+            // Кнопка "скачать / установить звук-модуль"
+            CmdBox.Text =
+                "powershell -NoProfile -ExecutionPolicy Bypass -Command " +
+                "\"Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force; " +
+                "Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -Confirm:$false\"";
+        }
+
+        private void sound100(object sender, RoutedEventArgs e)
+        {
+            // Кнопка "громкость 100%"
+            CmdBox.Text =
+                "powershell -NoProfile -Command " +
+                "\"Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100\"";
+        }
+
+        private void wifiinfo(object sender, RoutedEventArgs e)
+        {
+            // Кнопка: показать Wi-Fi профили + ключи
+            CmdBox.Text =
+                "for /f \"skip=9 tokens=1,2 delims=:\" %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear";
         }
     }
 }

@@ -6,24 +6,15 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Grid Margin="8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Верх: кнопки управления -->
-        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right">
-            <Button x:Name="btnMinimize" Content="_" Width="25" Margin="4,0"
-                    Click="btnMinimize_Click"/>
-            <Button x:Name="btnRestore" Content="▭" Width="25" Margin="4,0"
-                    Click="btnRestore_Click"/>
-            <Button x:Name="btnClose" Content="X" Width="25" Margin="4,0"
-                    Click="btnClose_Click"/>
-        </StackPanel>
-
+      
         <!-- Список сообщений -->
         <ListBox x:Name="MsgList"
-                 Grid.Row="1"
+                 Grid.Row="0"
                  Margin="0,4,0,4">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -47,7 +38,7 @@
         </ListBox>
 
         <!-- Ввод сообщения -->
-        <DockPanel Grid.Row="2">
+        <DockPanel Grid.Row="1">
             <Button Content="Отправить"
                     Width="90"
                     DockPanel.Dock="Right"
@@ -57,7 +48,7 @@
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"
-                     PreviewKeyDown="Input_PreviewKeyDown"/>
+                     PreviewKeyDown="Input_PreviewKeyDown" FontSize="14"/>
         </DockPanel>
     </Grid>
 </Window>

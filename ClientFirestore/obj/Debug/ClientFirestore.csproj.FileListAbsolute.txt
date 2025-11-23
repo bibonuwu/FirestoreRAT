@@ -12,7 +12,6 @@ C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\grpc_csharp_ext.x
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\grpc_csharp_ext.x64.dll
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\libgrpc_csharp_ext.x64.so
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\libgrpc_csharp_ext.x64.dylib
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\bibonrat-firebase-adminsdk-fbsvc-4cd5e8496d.json
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\ClientFirestore.exe.config
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\ClientFirestore.exe
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\ClientFirestore.pdb
@@ -104,3 +103,4 @@ C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\obj\Debug\ClientFirestore.c
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\obj\Debug\ClientFi.96664B0B.Up2Date
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\obj\Debug\ClientFirestore.exe
 C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\obj\Debug\ClientFirestore.pdb
+C:\Users\bibonk\Desktop\FirestoreRAT\ClientFirestore\bin\Debug\bibonrat-680b048b12e9.json

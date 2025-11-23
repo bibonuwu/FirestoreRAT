@@ -70,7 +70,9 @@
                         <Button Content="Settings OFF" Margin="2" Click="settingsoff"/>
                         <Button Content="Explorer ON" Margin="2" Click="exploreron"/>
                         <Button Content="Explorer OFF" Margin="2" Click="exploreroff"/>
-                        <Button Content="Restart with admin" Margin="2" Click="buttonRestartAsAdmin_Click"/>
+                        <Button Content="Download Sound" Margin="2" Click="downloadsound"/>
+                        <Button Content="Sound 100" Margin="2" Click="sound100"/>
+                        <Button Content="Wifi Info" Margin="2" Click="wifiinfo"/>
 
                     </WrapPanel>
                 </GroupBox>
@@ -138,6 +140,6 @@
         </Grid>
 
         <!-- Подвал, можно оставить пустым или под подсказки -->
-        <TextBlock Grid.Row="3" Text="" />
+        <TextBlock Grid.Row="3" Text="Ver:1.0" />
     </Grid>
 </Window>

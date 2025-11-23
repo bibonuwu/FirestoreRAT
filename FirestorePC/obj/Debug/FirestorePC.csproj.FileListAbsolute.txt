@@ -18,7 +18,6 @@ C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\grpc_csharp_ext.x86.d
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\grpc_csharp_ext.x64.dll
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\libgrpc_csharp_ext.x64.so
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\libgrpc_csharp_ext.x64.dylib
-C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\bibonrat-firebase-adminsdk-fbsvc-4cd5e8496d.json
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\FirestorePC.exe.config
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\FirestorePC.exe
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\FirestorePC.pdb
@@ -99,3 +98,4 @@ C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\System.Threading.Task
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\obj\Debug\Firestor.91192167.Up2Date
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\obj\Debug\FirestorePC.exe
 C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\obj\Debug\FirestorePC.pdb
+C:\Users\bibonk\Desktop\FirestoreRAT\FirestorePC\bin\Debug\bibonrat-680b048b12e9.json

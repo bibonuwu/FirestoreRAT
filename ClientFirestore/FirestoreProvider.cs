@@ -16,7 +16,7 @@ namespace ClientFirestore
             // projectId – ТОЧНО такой же, как написано сверху в Firebase console
             const string projectId = "bibonrat";   // пример, подставь свой
 
-            const string jsonFileName = "bibonrat-firebase-adminsdk-fbsvc-4cd5e8496d.json";
+            const string jsonFileName = "bibonrat-680b048b12e9.json";
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, jsonFileName);
 
             if (!File.Exists(path))
