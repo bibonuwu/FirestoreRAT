@@ -1,8 +1,10 @@
 ﻿using Google.Cloud.Firestore;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -40,13 +42,18 @@ namespace ClientFirestore
 
         private const string IPINFO_TOKEN = ""; // если есть токен ipinfo.io
 
+
+
         public MainWindow()
         {
             InitializeComponent();
 
             Closing += Window_Closing;
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+
         }
+
+      
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {

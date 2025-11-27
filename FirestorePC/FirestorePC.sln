@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirestorePC", "FirestorePC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientFirestore", "..\ClientFirestore\ClientFirestore.csproj", "{BD63A451-4972-4E2A-90D9-DD744A4F0018}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Bibon Team Project for Clients", "..\Bibon Team Project for Clients\Bibon Team Project for Clients.vdproj", "{7CD2BCB2-431D-AD91-7DB0-CE80F42E8ECA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientLauncher", "..\ClientLauncher\ClientLauncher.csproj", "{550C46F3-1BD9-4772-825F-AE94276C2B20}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FirestoreAdminPanel", "..\FirestoreAdminPanel\FirestoreAdminPanel.vdproj", "{B51A8A53-EC73-2E85-8536-B42E3399B808}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +27,14 @@ Global
 		{BD63A451-4972-4E2A-90D9-DD744A4F0018}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD63A451-4972-4E2A-90D9-DD744A4F0018}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD63A451-4972-4E2A-90D9-DD744A4F0018}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CD2BCB2-431D-AD91-7DB0-CE80F42E8ECA}.Debug|Any CPU.ActiveCfg = Debug
+		{7CD2BCB2-431D-AD91-7DB0-CE80F42E8ECA}.Release|Any CPU.ActiveCfg = Release
+		{550C46F3-1BD9-4772-825F-AE94276C2B20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{550C46F3-1BD9-4772-825F-AE94276C2B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{550C46F3-1BD9-4772-825F-AE94276C2B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{550C46F3-1BD9-4772-825F-AE94276C2B20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B51A8A53-EC73-2E85-8536-B42E3399B808}.Debug|Any CPU.ActiveCfg = Debug
+		{B51A8A53-EC73-2E85-8536-B42E3399B808}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

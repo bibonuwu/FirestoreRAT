@@ -16,7 +16,7 @@ namespace FirestorePC
         private static FirestoreDb CreateDb()
         {
             // имя JSON файла service account – как у тебя в проекте
-            const string jsonFileName = "bibonrat-680b048b12e9.json";
+            const string jsonFileName = "bibonrat-firebase.json";
 
             // СВОЙ project id из Firebase console
             const string projectId = "bibonrat";
