@@ -395,6 +395,7 @@ button {
         flex: 1;
         padding: 12px 14px;
     }
+
 .badge.good {
     color: rgba(53,208,127,.95);
     border-color: rgba(53,208,127,.25);
@@ -409,6 +410,7 @@ button {
     color: rgba(255,200,87,.95);
     border-color: rgba(255,200,87,.25);
 }
+
 .cmdPanel {
     border-bottom: 1px solid var(--line);
     padding: 12px 14px;
@@ -460,6 +462,7 @@ button {
     font-size: 12px;
     color: rgba(233,238,255,.90);
 }
+
 .cmdForm select {
     width: 220px;
     padding: 12px 14px;
@@ -474,5 +477,12 @@ button {
         border-color: rgba(120,160,255,.55);
         box-shadow: 0 0 0 3px rgba(120,160,255,.12);
     }
+html, body {
+  margin: 0;
+  padding: 0;
+}
 
-
+body {
+  min-width: 1200px;  /* имитация ширины ПК */
+  overflow-x: auto;   /* чтобы на телефоне можно было скроллить вбок */
+}
