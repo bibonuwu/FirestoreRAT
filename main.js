@@ -1,4 +1,4 @@
-﻿// main.js
+// main.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
     getAuth,
@@ -811,4 +811,3 @@ cmdPreset?.addEventListener("change", () => {
     // вернуть select на "Шаблоны…"
     cmdPreset.value = "";
 });
-
