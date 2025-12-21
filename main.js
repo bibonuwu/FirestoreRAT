@@ -58,9 +58,34 @@ const btnRefresh = document.getElementById("btnRefresh");
 const authError = document.getElementById("authError");
 const meEmail = document.getElementById("meEmail");
 
+// Страницы
+const pcListSection = document.getElementById("pcListSection");
+const pcInfoSection = document.getElementById("pcInfoSection");
+const chatSection = document.getElementById("chatSection");
+const commandSection = document.getElementById("commandSection");
+
+// Элементы меню
+const menuItems = document.querySelectorAll(".menuItem");
+const pcCountBadge = document.getElementById("pcCountBadge");
+const selectedPcBadge = document.getElementById("selectedPcBadge");
+const chatBadge = document.getElementById("chatBadge");
+const cmdBadge = document.getElementById("cmdBadge");
+
+// PC List Page
 const searchEl = document.getElementById("search");
 const clientsList = document.getElementById("clientsList");
+const btnPingAll = document.getElementById("btnPingAll");
+const pingAllStatus = document.getElementById("pingAllStatus");
+const totalClients = document.getElementById("totalClients");
+const onlineClients = document.getElementById("onlineClients");
+const offlineClients = document.getElementById("offlineClients");
 
+// PC Info Page
+const infoContent = document.getElementById("infoContent");
+const selectedClientName = document.getElementById("selectedClientName");
+const pcOnlineStatus = document.getElementById("pcOnlineStatus");
+
+// Chat Page
 const chatStatus = document.getElementById("chatStatus");
 const chatHeader = document.getElementById("chatHeader");
 const chatBody = document.getElementById("chatBody");
@@ -82,26 +107,25 @@ const btnCloseChat = document.getElementById("btnCloseChat");
 const btnPing = document.getElementById("btnPing");
 const pingStatus = document.getElementById("pingStatus");
 
-const btnPingAll = document.getElementById("btnPingAll");
-const pingAllStatus = document.getElementById("pingAllStatus");
+const msgInput = document.getElementById("msgInput");
+const btnSend = document.getElementById("btnSend");
 
-const btnCommand = document.getElementById("btnCommand");
-const cmdPanel = document.getElementById("cmdPanel");
-const btnCmdClose = document.getElementById("btnCmdClose");
+// Command Page
+const cmdPanel = document.querySelector(".cmdPanel");
 const cmdInput = document.getElementById("cmdInput");
 const btnCmdSend = document.getElementById("btnCmdSend");
 const cmdOutput = document.getElementById("cmdOutput");
 const cmdStatusBadge = document.getElementById("cmdStatusBadge");
-
-const msgInput = document.getElementById("msgInput");
-const btnSend = document.getElementById("btnSend");
-
+const cmdClientName = document.getElementById("cmdClientName");
 const cmdPreset = document.getElementById("cmdPreset");
+const btnCmdClose = document.getElementById("btnCmdClose");
 
 
 // ---------- State ----------
 let pcDocs = [];
 let selectedClientId = null;
+let selectedClientData = null;
+let currentPage = "pcList";
 
 let unsubscribeClients = null;
 let unsubscribeChat = null;
@@ -141,6 +165,7 @@ function showAuth() {
     cleanupClientsSubscription();
     cleanupCmdSubscription();
     selectedClientId = null;
+    selectedClientData = null;
     chatIsOpen = false;
 }
 
@@ -149,6 +174,7 @@ function showApp(user) {
     appScreen?.classList.remove("hidden");
     if (meEmail) meEmail.textContent = user?.email || "";
     setAuthError("");
+    switchPage("pcList");
 }
 
 function cleanupChatSubscription() {
@@ -197,6 +223,64 @@ function nowLocalString() {
     const pad = (n) => String(n).padStart(2, "0");
     return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
+
+// ---------- PAGE NAVIGATION ----------
+function switchPage(pageName) {
+    currentPage = pageName;
+
+    // Скрыть все секции
+    [pcListSection, pcInfoSection, chatSection, commandSection].forEach(section => {
+        section?.classList.add("hidden");
+    });
+
+    // Показать выбранную секцию
+    const sectionMap = {
+        "pcList": pcListSection,
+        "pcInfo": pcInfoSection,
+        "chat": chatSection,
+        "command": commandSection
+    };
+
+    if (sectionMap[pageName]) {
+        sectionMap[pageName].classList.remove("hidden");
+    }
+
+    // Обновить активный пункт меню
+    menuItems.forEach(item => {
+        if (item.getAttribute("data-page") === pageName) {
+            item.classList.add("active");
+        } else {
+            item.classList.remove("active");
+        }
+    });
+
+    // Обновить содержимое страницы
+    updatePageContent();
+}
+
+function updatePageContent() {
+    switch (currentPage) {
+        case "pcInfo":
+            renderPcInfo();
+            break;
+        case "chat":
+            renderChatPage();
+            break;
+        case "command":
+            renderCommandPage();
+            break;
+    }
+}
+
+// Навигация по меню
+menuItems.forEach(item => {
+    item.addEventListener("click", () => {
+        const page = item.getAttribute("data-page");
+        if (page) {
+            switchPage(page);
+        }
+    });
+});
 
 // ---------- AUTH ----------
 onAuthStateChanged(auth, (user) => {
@@ -254,13 +338,15 @@ function startClientsRealtime() {
 
         pcDocs = arr;
         renderClients();
+        updateStats();
 
         if (selectedClientId) {
             const exists = pcDocs.some(x => x.id === selectedClientId);
             if (!exists) {
                 selectClient(null);
             } else {
-                renderSelectedHeader();
+                selectedClientData = pcDocs.find(x => x.id === selectedClientId);
+                updateSelectedClientInfo();
             }
         }
     }, (err) => {
@@ -268,6 +354,26 @@ function startClientsRealtime() {
             clientsList.innerHTML = `<div class="err" style="padding:10px;">Ошибка pcList: ${escapeHtml(err?.message || err)}</div>`;
         }
     });
+}
+
+function updateStats() {
+    const total = pcDocs.length;
+    const online = pcDocs.filter(c => c.online?.pcOnline === 1).length;
+    const offline = total - online;
+
+    if (totalClients) totalClients.textContent = total;
+    if (onlineClients) onlineClients.textContent = online;
+    if (offlineClients) offlineClients.textContent = offline;
+
+    // Обновить бейдж в меню
+    if (pcCountBadge) {
+        pcCountBadge.textContent = total;
+        if (online > 0) {
+            pcCountBadge.className = "badge ok";
+        } else {
+            pcCountBadge.className = "badge";
+        }
+    }
 }
 
 function clientSearchKey(c) {
@@ -320,41 +426,215 @@ function renderClients() {
     });
 }
 
-// ---------- OPEN/CLOSE CHAT ----------
+// ---------- SELECT CLIENT ----------
 function selectClient(id) {
     if (selectedClientId && chatIsOpen && selectedClientId !== id) {
         setAdminFlags(selectedClientId, 0).catch(() => { });
     }
 
     selectedClientId = id;
+    selectedClientData = id ? pcDocs.find(x => x.id === id) : null;
+
     chatIsOpen = false;
     cleanupChatSubscription();
     cleanupCmdSubscription();
-    if (cmdPanel) cmdPanel.classList.add("hidden");
-    renderClients();
 
-    // reset ping badges
+    renderClients();
+    updateSelectedClientInfo();
+
+    // Обновить бейджи в меню
+    if (selectedPcBadge) {
+        if (id) {
+            selectedPcBadge.textContent = "✓";
+            selectedPcBadge.className = "badge ok";
+        } else {
+            selectedPcBadge.textContent = "—";
+            selectedPcBadge.className = "badge";
+        }
+    }
+
+    if (chatBadge) {
+        chatBadge.textContent = "OFF";
+        chatBadge.className = "badge";
+    }
+
+    if (cmdBadge) {
+        cmdBadge.textContent = "—";
+        cmdBadge.className = "badge";
+    }
+
+    // Сбросить пинг
     setPingBadge("—", "");
     setPingAllBadge("—", "");
 
-    if (!id) {
-        if (chatStatus) chatStatus.textContent = "не выбран клиент";
-        chatHeader?.classList.add("hidden");
-        chatInputBar?.classList.add("hidden");
-        if (chatBody) chatBody.innerHTML = `<div class="hint">Выбери клиента слева, чтобы открыть чат.</div>`;
+    // Обновить текущую страницу
+    updatePageContent();
+}
+
+function updateSelectedClientInfo() {
+    if (!selectedClientId || !selectedClientData) {
+        if (selectedClientName) selectedClientName.textContent = "Не выбран";
+        if (pcOnlineStatus) pcOnlineStatus.textContent = "—";
         return;
     }
 
-    renderSelectedHeader();
-    if (chatStatus) chatStatus.textContent = "нажми «Открыть чат у клиента»";
-    if (chatBody) chatBody.innerHTML = `<div class="hint">Нажми <b>Открыть чат у клиента</b>, чтобы загрузить сообщения.</div>`;
-    chatInputBar?.classList.add("hidden");
+    const pcName = selectedClientData?.system?.pcName || selectedClientId;
+    const badge = onlineBadge(selectedClientData?.online?.pcOnline);
+
+    if (selectedClientName) selectedClientName.textContent = pcName;
+    if (pcOnlineStatus) {
+        pcOnlineStatus.textContent = badge.text;
+        pcOnlineStatus.className = `badge ${badge.cls}`;
+    }
 }
 
-function renderSelectedHeader() {
-    const client = pcDocs.find(x => x.id === selectedClientId);
-    if (!client) return;
+// ---------- PC INFO PAGE ----------
+function renderPcInfo() {
+    if (!infoContent) return;
 
+    if (!selectedClientId || !selectedClientData) {
+        infoContent.innerHTML = `<div class="hint">Выберите клиента на странице "PC List" для просмотра информации</div>`;
+        return;
+    }
+
+    const client = selectedClientData;
+    const sys = client.system || {};
+    const online = client.online || {};
+
+    const infoCards = [];
+
+    // Основная информация
+    infoCards.push(`
+        <div class="infoCard">
+            <div class="infoCardTitle">Основная информация</div>
+            <div class="infoRow">
+                <span class="infoLabel">ID документа:</span>
+                <span class="infoValue">${escapeHtml(client.id)}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Имя ПК:</span>
+                <span class="infoValue">${escapeHtml(sys.pcName || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Пользователь:</span>
+                <span class="infoValue">${escapeHtml(sys.userName || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Статус:</span>
+                <span class="infoValue">${onlineBadge(online.pcOnline).text}</span>
+            </div>
+        </div>
+    `);
+
+    // Сетевая информация
+    infoCards.push(`
+        <div class="infoCard">
+            <div class="infoCardTitle">Сетевая информация</div>
+            <div class="infoRow">
+                <span class="infoLabel">Внешний IP:</span>
+                <span class="infoValue">${escapeHtml(sys.internetIp || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Локальный IP:</span>
+                <span class="infoValue">${escapeHtml(sys.localIp || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">MAC адрес:</span>
+                <span class="infoValue">${escapeHtml(sys.macAddress || "—")}</span>
+            </div>
+        </div>
+    `);
+
+    // Геолокация
+    infoCards.push(`
+        <div class="infoCard">
+            <div class="infoCardTitle">Геолокация</div>
+            <div class="infoRow">
+                <span class="infoLabel">Страна:</span>
+                <span class="infoValue">${escapeHtml(sys.country || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Регион:</span>
+                <span class="infoValue">${escapeHtml(sys.region || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Город:</span>
+                <span class="infoValue">${escapeHtml(sys.city || "—")}</span>
+            </div>
+        </div>
+    `);
+
+    // Системная информация
+    infoCards.push(`
+        <div class="infoCard">
+            <div class="infoCardTitle">Система</div>
+            <div class="infoRow">
+                <span class="infoLabel">ОС:</span>
+                <span class="infoValue">${escapeHtml(sys.osVersion || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Архитектура:</span>
+                <span class="infoValue">${escapeHtml(sys.architecture || "—")}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">Время работы:</span>
+                <span class="infoValue">${escapeHtml(online.startTime || "—")}</span>
+            </div>
+        </div>
+    `);
+
+    // Флаги
+    infoCards.push(`
+        <div class="infoCard">
+            <div class="infoCardTitle">Флаги состояния</div>
+            <div class="infoRow">
+                <span class="infoLabel">adminOnline:</span>
+                <span class="infoValue">${client.adminOnline || 0}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">adminOpen:</span>
+                <span class="infoValue">${client.adminOpen || 0}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">clientOnline:</span>
+                <span class="infoValue">${client.clientOnline || 0}</span>
+            </div>
+            <div class="infoRow">
+                <span class="infoLabel">clientOpen:</span>
+                <span class="infoValue">${client.clientOpen || 0}</span>
+            </div>
+        </div>
+    `);
+
+    infoContent.innerHTML = `<div class="infoGrid">${infoCards.join("")}</div>`;
+}
+
+// ---------- CHAT PAGE ----------
+function renderChatPage() {
+    if (!selectedClientId) {
+        chatHeader?.classList.add("hidden");
+        chatInputBar?.classList.add("hidden");
+        if (chatBody) chatBody.innerHTML = `<div class="hint">Выберите клиента на странице "PC List" для начала чата</div>`;
+        if (chatStatus) chatStatus.textContent = "не выбран клиент";
+        return;
+    }
+
+    renderChatHeader();
+
+    if (!chatIsOpen) {
+        chatInputBar?.classList.add("hidden");
+        if (chatBody) chatBody.innerHTML = `<div class="hint">Нажмите <b>Открыть чат</b> для загрузки сообщений</div>`;
+        if (chatStatus) chatStatus.textContent = "чат закрыт";
+    } else {
+        chatInputBar?.classList.remove("hidden");
+        if (chatStatus) chatStatus.textContent = "чат открыт";
+    }
+}
+
+function renderChatHeader() {
+    if (!selectedClientId || !selectedClientData) return;
+
+    const client = selectedClientData;
     const pcName = client?.system?.pcName || selectedClientId;
     const badge = onlineBadge(client?.online?.pcOnline);
 
@@ -367,16 +647,19 @@ function renderSelectedHeader() {
 
     if (chatClientIdPill) chatClientIdPill.textContent = `pcList/${selectedClientId}`;
 
-    // ✅ pills из system (все данные)
+    // ✅ pills из system
     const sys = client?.system || {};
     const pills = [];
     if (sys.userName) pills.push(`<span class="pill">@${escapeHtml(sys.userName)}</span>`);
-    if (sys.pcName) pills.push(`<span class="pill">PC: ${escapeHtml(sys.pcName)}</span>`);
     if (sys.region) pills.push(`<span class="pill">${escapeHtml(sys.region)}</span>`);
     if (sys.city) pills.push(`<span class="pill">${escapeHtml(sys.city)}</span>`);
-    if (sys.country) pills.push(`<span class="pill">${escapeHtml(sys.country)}</span>`);
-    if (sys.internetIp) pills.push(`<span class="pill">Internet IP: ${escapeHtml(sys.internetIp)}</span>`);
-    if (sys.localIp) pills.push(`<span class="pill">Local IP: ${escapeHtml(sys.localIp)}</span>`);
+    if (sys.internetIp) pills.push(`<span class="pill">IP: ${escapeHtml(sys.internetIp)}</span>`);
+
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile && pills.length > 2) {
+        pills.length = 2;
+        pills.push('<span class="pill">...</span>');
+    }
 
     if (chatClientMeta) chatClientMeta.innerHTML = pills.join(" ");
 
@@ -428,6 +711,12 @@ btnOpenChat?.addEventListener("click", async () => {
 
         if (chatStatus) chatStatus.textContent = "чат открыт";
         msgInput?.focus();
+
+        // Обновить бейдж в меню
+        if (chatBadge) {
+            chatBadge.textContent = "ON";
+            chatBadge.className = "badge ok";
+        }
     } catch (e) {
         if (chatStatus) chatStatus.textContent = "ошибка";
         alert("Не удалось открыть чат: " + (e?.message || e));
@@ -444,8 +733,14 @@ btnCloseChat?.addEventListener("click", async () => {
 
         cleanupChatSubscription();
         chatInputBar?.classList.add("hidden");
-        if (chatBody) chatBody.innerHTML = `<div class="hint">Чат закрыт. Нажми <b>Открыть чат у клиента</b>, чтобы продолжить.</div>`;
+        if (chatBody) chatBody.innerHTML = `<div class="hint">Чат закрыт. Нажмите <b>Открыть чат</b> для продолжения.</div>`;
         if (chatStatus) chatStatus.textContent = "чат закрыт";
+
+        // Обновить бейдж в меню
+        if (chatBadge) {
+            chatBadge.textContent = "OFF";
+            chatBadge.className = "badge";
+        }
     } catch (e) {
         if (chatStatus) chatStatus.textContent = "ошибка";
         alert("Не удалось закрыть чат: " + (e?.message || e));
@@ -475,7 +770,7 @@ function renderMessages(msgs) {
     if (!chatBody) return;
 
     if (!msgs || msgs.length === 0) {
-        chatBody.innerHTML = `<div class="hint">Сообщений пока нет. Напиши первое сообщение.</div>`;
+        chatBody.innerHTML = `<div class="hint">Сообщений пока нет. Напишите первое сообщение.</div>`;
         return;
     }
 
@@ -676,7 +971,18 @@ btnPingAll?.addEventListener("click", () => {
     });
 });
 
-// ---------- COMMAND PANEL ----------
+// ---------- COMMAND PAGE ----------
+function renderCommandPage() {
+    if (!selectedClientId) {
+        if (cmdClientName) cmdClientName.textContent = "Не выбран";
+        if (cmdOutput) cmdOutput.textContent = "Выберите клиента на странице 'PC List' для отправки команд";
+        return;
+    }
+
+    const pcName = selectedClientData?.system?.pcName || selectedClientId;
+    if (cmdClientName) cmdClientName.textContent = pcName;
+}
+
 function setCmdBadge(text, cls) {
     if (!cmdStatusBadge) return;
     cmdStatusBadge.textContent = text;
@@ -730,6 +1036,15 @@ function startCommandRealtime(clientId) {
         else setCmdBadge(d.status || "—", "");
 
         if (cmdOutput) cmdOutput.textContent = fmtCmdResult(d);
+
+        // Обновить бейдж в меню
+        if (cmdBadge) {
+            cmdBadge.textContent = status.toUpperCase();
+            if (status === "done") cmdBadge.className = "badge good";
+            else if (status === "running") cmdBadge.className = "badge wait";
+            else if (status === "error") cmdBadge.className = "badge bad2";
+            else cmdBadge.className = "badge";
+        }
     }, (err) => {
         setCmdBadge("ошибка", "bad2");
         if (cmdOutput) cmdOutput.textContent = "Ошибка чтения command/current: " + (err?.message || err);
@@ -755,35 +1070,24 @@ async function sendCommand(clientId, cmdText) {
     return id;
 }
 
-
-btnCommand?.addEventListener("click", () => {
-    if (!selectedClientId || !cmdPanel) return;
-
-    cmdPanel.classList.toggle("hidden");
-
-    if (!cmdPanel.classList.contains("hidden")) {
-        startCommandRealtime(selectedClientId);
-        cmdInput?.focus();
-    } else {
-        cleanupCmdSubscription();
-    }
-});
-
-btnCmdClose?.addEventListener("click", () => {
-    cmdPanel?.classList.add("hidden");
-    cleanupCmdSubscription();
-});
-
 btnCmdSend?.addEventListener("click", async () => {
-    if (!selectedClientId) return;
+    if (!selectedClientId) {
+        alert("Сначала выберите клиента!");
+        return;
+    }
+
     const text = (cmdInput?.value || "").trim();
-    if (!text) return;
+    if (!text) {
+        alert("Введите команду!");
+        return;
+    }
 
     try {
         setCmdBadge("отправка…", "wait");
         await sendCommand(selectedClientId, text);
         if (cmdInput) cmdInput.value = "";
         setCmdBadge("отправлено", "wait");
+        startCommandRealtime(selectedClientId);
     } catch (e) {
         setCmdBadge("ошибка", "bad2");
         alert("Command send error: " + (e?.message || e));
@@ -804,10 +1108,41 @@ cmdPreset?.addEventListener("change", () => {
     if (cmdInput) {
         cmdInput.value = v;
         cmdInput.focus();
-        // курсор в конец
         cmdInput.setSelectionRange(cmdInput.value.length, cmdInput.value.length);
     }
 
-    // вернуть select на "Шаблоны…"
     cmdPreset.value = "";
+});
+
+btnCmdClose?.addEventListener("click", () => {
+    if (cmdOutput) cmdOutput.textContent = "Выберите клиента и отправьте команду...";
+    setCmdBadge("—", "");
+
+    if (cmdBadge) {
+        cmdBadge.textContent = "—";
+        cmdBadge.className = "badge";
+    }
+});
+
+// Адаптация для мобильных
+window.addEventListener('resize', function () {
+    if (selectedClientId) {
+        renderChatHeader();
+    }
+});
+
+// Предотвращаем масштабирование на мобильных при двойном тапе
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function () {
+    // Фокус на поле email при загрузке
+    if (emailEl) emailEl.focus();
 });
