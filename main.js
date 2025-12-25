@@ -104,6 +104,10 @@ const fClientOpen = document.getElementById("fClientOpen");
 const btnOpenChat = document.getElementById("btnOpenChat");
 const btnCloseChat = document.getElementById("btnCloseChat");
 
+const btnGetPhoto = document.getElementById("btnGetPhoto");
+
+
+
 const btnPing = document.getElementById("btnPing");
 const pingStatus = document.getElementById("pingStatus");
 
@@ -538,10 +542,7 @@ function renderPcInfo() {
                 <span class="infoLabel">Локальный IP:</span>
                 <span class="infoValue">${escapeHtml(sys.localIp || "—")}</span>
             </div>
-            <div class="infoRow">
-                <span class="infoLabel">MAC адрес:</span>
-                <span class="infoValue">${escapeHtml(sys.macAddress || "—")}</span>
-            </div>
+           
         </div>
     `);
 
@@ -746,6 +747,8 @@ btnCloseChat?.addEventListener("click", async () => {
         alert("Не удалось закрыть чат: " + (e?.message || e));
     }
 });
+
+
 
 // ---------- MESSAGES ----------
 function isNearBottom(el) {
@@ -1146,3 +1149,4 @@ document.addEventListener('DOMContentLoaded', function () {
     // Фокус на поле email при загрузке
     if (emailEl) emailEl.focus();
 });
+
