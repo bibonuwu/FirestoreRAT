@@ -321,6 +321,36 @@ btnLogout?.addEventListener("click", async () => {
     await signOut(auth);
 });
 
+// Добавьте этот код в обработчик кнопки Get Photo
+btnGetPhoto?.addEventListener("click", async () => {
+    if (!selectedClientId) {
+        alert("Выберите клиента!");
+        return;
+    }
+
+    try {
+        // Устанавливаем значение 1 в базу данных
+        const ref = doc(db, "pcList", selectedClientId);
+        await updateDoc(ref, { 
+            photoRequest: 1,
+            photoRequestTime: serverTimestamp() // можно добавить время запроса
+        });
+        
+        setPingBadge("Запрос фото отправлен", "good");
+        console.log(`Запрос фото отправлен для клиента ${selectedClientId}`);
+        
+        // Автоматически сбросить через 2 секунды (опционально)
+        setTimeout(() => {
+            setPingBadge("—", "");
+        }, 2000);
+        
+    } catch (error) {
+        setPingBadge("Ошибка запроса", "bad2");
+        console.error("Ошибка при отправке запроса фото:", error);
+        alert("Ошибка при отправке запроса фото: " + error.message);
+    }
+});
+
 // ---------- CLIENTS (realtime) ----------
 btnRefresh?.addEventListener("click", () => renderClients());
 searchEl?.addEventListener("input", renderClients);
@@ -1149,4 +1179,5 @@ document.addEventListener('DOMContentLoaded', function () {
     // Фокус на поле email при загрузке
     if (emailEl) emailEl.focus();
 });
+
 
