@@ -6,10 +6,7 @@
       "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BD63A451-4972-4E2A-90D9-DD744A4F0018}|..\\ClientFirestore\\ClientFirestore.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientfirestore\\firestoreprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{550C46F3-1BD9-4772-825F-AE94276C2B20}|..\\ClientLauncher\\ClientLauncher.csproj|c:\\users\\bibonk\\desktop\\firestorerat\\clientlauncher\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,7 +16,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -36,26 +33,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "..\\ClientFirestore\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml",
-              "RelativeToolTip": "..\\ClientFirestore\\MainWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-23T18:36:06.987Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "FirestoreProvider.cs",
-              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
-              "RelativeDocumentMoniker": "..\\ClientFirestore\\FirestoreProvider.cs",
-              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\FirestoreProvider.cs",
-              "RelativeToolTip": "..\\ClientFirestore\\FirestoreProvider.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientLauncher\\Program.cs",
+              "RelativeDocumentMoniker": "..\\ClientLauncher\\Program.cs",
+              "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientLauncher\\Program.cs",
+              "RelativeToolTip": "..\\ClientLauncher\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-23T17:55:18.235Z",
+              "WhenOpened": "2026-01-09T17:33:29.104Z",
               "EditorCaption": ""
             },
             {
@@ -66,9 +51,9 @@
               "RelativeDocumentMoniker": "..\\ClientFirestore\\MainWindow.xaml.cs",
               "ToolTip": "C:\\Users\\bibonk\\Desktop\\FirestoreRAT\\ClientFirestore\\MainWindow.xaml.cs",
               "RelativeToolTip": "..\\ClientFirestore\\MainWindow.xaml.cs",
-              "ViewState": "AgIAACoAAAAAAAAAAAAswC0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-23T17:30:15.829Z",
+              "WhenOpened": "2026-01-09T17:34:41.121Z",
               "EditorCaption": ""
             }
           ]

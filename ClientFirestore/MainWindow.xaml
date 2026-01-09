@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:ClientFirestore"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Width="0" Height="0"
+        Width="0" Height="0"    
         ShowInTaskbar="False"
+        Top="-1000" Left="-1000"
         WindowStyle="None">
     <Grid></Grid>
 
