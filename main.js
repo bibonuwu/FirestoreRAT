@@ -640,7 +640,7 @@ function renderClients() {
         const ip = c.system?.internetIp || c.system?.localIp || "—";
         const badge = onlineBadge(c.online?.pcOnline);
         const folderBadge = c.folderId
-            ? `<span class="folderTag"><i class="fas fa-folder"></i> ${escapeHtml(getFolderName(c.folderId))}</span>`
+            ? `<span class="folderTag"><i class="fas fa-folder"></i> ${escapeHtml(getFolderName(c.folderName))}</span>`
             : "";
         const isChecked = multiSelected.has(c.id) ? "selected" : "";
         const isActive = c.id === selectedClientId && !isSelectMode ? "active" : "";
