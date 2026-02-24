@@ -20,7 +20,9 @@ import {
     doc,
     updateDoc,
     getDocs,
-    setDoc
+    setDoc,
+    deleteDoc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 // ✅ ТВОЙ firebaseConfig
@@ -40,7 +42,7 @@ const db = getFirestore(app);
 
 // ==== настройки ====
 const MAX_MESSAGES = 6;
-const ADMIN_NAME = "Admin";     // должно совпадать с C# (Admin)
+const ADMIN_NAME = "Admin";
 const PING_TIMEOUT_MS = 8000;
 
 // ---------- UI ----------
@@ -63,6 +65,7 @@ const pcListSection = document.getElementById("pcListSection");
 const pcInfoSection = document.getElementById("pcInfoSection");
 const chatSection = document.getElementById("chatSection");
 const commandSection = document.getElementById("commandSection");
+const foldersSection = document.getElementById("foldersSection");
 
 // Элементы меню
 const menuItems = document.querySelectorAll(".menuItem");
@@ -70,6 +73,7 @@ const pcCountBadge = document.getElementById("pcCountBadge");
 const selectedPcBadge = document.getElementById("selectedPcBadge");
 const chatBadge = document.getElementById("chatBadge");
 const cmdBadge = document.getElementById("cmdBadge");
+const foldersBadge = document.getElementById("foldersBadge");
 
 // PC List Page
 const searchEl = document.getElementById("search");
@@ -79,6 +83,18 @@ const pingAllStatus = document.getElementById("pingAllStatus");
 const totalClients = document.getElementById("totalClients");
 const onlineClients = document.getElementById("onlineClients");
 const offlineClients = document.getElementById("offlineClients");
+
+// Sort & Filter
+const sortDirBtn = document.getElementById("sortDirBtn");
+const folderFilterBtns = document.getElementById("folderFilterBtns");
+
+// Multi-select
+const btnSelectMode = document.getElementById("btnSelectMode");
+const multiSelectBar = document.getElementById("multiSelectBar");
+const multiSelectCount = document.getElementById("multiSelectCount");
+const btnMoveToFolder = document.getElementById("btnMoveToFolder");
+const btnRemoveFromFolder = document.getElementById("btnRemoveFromFolder");
+const btnCancelSelect = document.getElementById("btnCancelSelect");
 
 // PC Info Page
 const infoContent = document.getElementById("infoContent");
@@ -103,10 +119,7 @@ const fClientOpen = document.getElementById("fClientOpen");
 
 const btnOpenChat = document.getElementById("btnOpenChat");
 const btnCloseChat = document.getElementById("btnCloseChat");
-
 const btnGetPhoto = document.getElementById("btnGetPhoto");
-
-
 
 const btnPing = document.getElementById("btnPing");
 const pingStatus = document.getElementById("pingStatus");
@@ -124,6 +137,20 @@ const cmdClientName = document.getElementById("cmdClientName");
 const cmdPreset = document.getElementById("cmdPreset");
 const btnCmdClose = document.getElementById("btnCmdClose");
 
+// Folders Page
+const btnCreateRootFolder = document.getElementById("btnCreateRootFolder");
+const foldersCountBadge = document.getElementById("foldersCountBadge");
+const folderTreeRoot = document.getElementById("folderTreeRoot");
+const folderClientsTitle = document.getElementById("folderClientsTitle");
+const folderClientsCount = document.getElementById("folderClientsCount");
+const folderClientsList = document.getElementById("folderClientsList");
+
+// Modal
+const moveFolderModal = document.getElementById("moveFolderModal");
+const modalClose = document.getElementById("modalClose");
+const modalCancel = document.getElementById("modalCancel");
+const modalFolderList = document.getElementById("modalFolderList");
+const modalMoveToRoot = document.getElementById("modalMoveToRoot");
 
 // ---------- State ----------
 let pcDocs = [];
@@ -134,9 +161,29 @@ let currentPage = "pcList";
 let unsubscribeClients = null;
 let unsubscribeChat = null;
 let unsubscribeCmd = null;
+let unsubscribeFolders = null;
 
 let chatIsOpen = false;
 let trimLock = false;
+
+// Sort state
+let sortBy = "date";     // "date" | "name" | "online" | "folder"
+let sortDir = "desc";    // "asc" | "desc"
+
+// Folder filter (PC List page)
+let activeFolderFilter = "all"; // "all" | "__none__" | folderId
+
+// Multi-select state
+let isSelectMode = false;
+let multiSelected = new Set(); // set of client IDs
+
+// Drag & drop state
+let dragClientId = null;
+
+// Folders state
+let folderDocs = [];               // from FoldSort collection
+let activeFolderPageId = null;     // folder currently viewed in Folders page
+let collapsedFolders = new Set();  // collapsed folder IDs in tree
 
 // ---------- helpers ----------
 function setAuthError(msg) { if (authError) authError.textContent = msg || ""; }
@@ -168,6 +215,7 @@ function showAuth() {
     cleanupChatSubscription();
     cleanupClientsSubscription();
     cleanupCmdSubscription();
+    cleanupFoldersSubscription();
     selectedClientId = null;
     selectedClientData = null;
     chatIsOpen = false;
@@ -182,22 +230,16 @@ function showApp(user) {
 }
 
 function cleanupChatSubscription() {
-    if (unsubscribeChat) {
-        unsubscribeChat();
-        unsubscribeChat = null;
-    }
+    if (unsubscribeChat) { unsubscribeChat(); unsubscribeChat = null; }
 }
 function cleanupClientsSubscription() {
-    if (unsubscribeClients) {
-        unsubscribeClients();
-        unsubscribeClients = null;
-    }
+    if (unsubscribeClients) { unsubscribeClients(); unsubscribeClients = null; }
 }
 function cleanupCmdSubscription() {
-    if (unsubscribeCmd) {
-        unsubscribeCmd();
-        unsubscribeCmd = null;
-    }
+    if (unsubscribeCmd) { unsubscribeCmd(); unsubscribeCmd = null; }
+}
+function cleanupFoldersSubscription() {
+    if (unsubscribeFolders) { unsubscribeFolders(); unsubscribeFolders = null; }
 }
 
 function tsToDate(ts) {
@@ -232,24 +274,22 @@ function nowLocalString() {
 function switchPage(pageName) {
     currentPage = pageName;
 
-    // Скрыть все секции
-    [pcListSection, pcInfoSection, chatSection, commandSection].forEach(section => {
+    [pcListSection, pcInfoSection, chatSection, commandSection, foldersSection].forEach(section => {
         section?.classList.add("hidden");
     });
 
-    // Показать выбранную секцию
     const sectionMap = {
         "pcList": pcListSection,
         "pcInfo": pcInfoSection,
         "chat": chatSection,
-        "command": commandSection
+        "command": commandSection,
+        "folders": foldersSection
     };
 
     if (sectionMap[pageName]) {
         sectionMap[pageName].classList.remove("hidden");
     }
 
-    // Обновить активный пункт меню
     menuItems.forEach(item => {
         if (item.getAttribute("data-page") === pageName) {
             item.classList.add("active");
@@ -258,7 +298,6 @@ function switchPage(pageName) {
         }
     });
 
-    // Обновить содержимое страницы
     updatePageContent();
 }
 
@@ -273,16 +312,16 @@ function updatePageContent() {
         case "command":
             renderCommandPage();
             break;
+        case "folders":
+            renderFolderPage();
+            break;
     }
 }
 
-// Навигация по меню
 menuItems.forEach(item => {
     item.addEventListener("click", () => {
         const page = item.getAttribute("data-page");
-        if (page) {
-            switchPage(page);
-        }
+        if (page) switchPage(page);
     });
 });
 
@@ -291,6 +330,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         showApp(user);
         startClientsRealtime();
+        startFoldersRealtime();
     } else {
         showAuth();
     }
@@ -321,32 +361,19 @@ btnLogout?.addEventListener("click", async () => {
     await signOut(auth);
 });
 
-// Добавьте этот код в обработчик кнопки Get Photo
+// ---------- PHOTO ----------
 btnGetPhoto?.addEventListener("click", async () => {
-    if (!selectedClientId) {
-        alert("Выберите клиента!");
-        return;
-    }
-
+    if (!selectedClientId) { alert("Выберите клиента!"); return; }
     try {
-        // Устанавливаем значение 1 в базу данных
         const ref = doc(db, "pcList", selectedClientId);
-        await updateDoc(ref, { 
+        await updateDoc(ref, {
             photoRequest: 1,
-            photoRequestTime: serverTimestamp() // можно добавить время запроса
+            photoRequestTime: serverTimestamp()
         });
-        
         setPingBadge("Запрос фото отправлен", "good");
-        console.log(`Запрос фото отправлен для клиента ${selectedClientId}`);
-        
-        // Автоматически сбросить через 2 секунды (опционально)
-        setTimeout(() => {
-            setPingBadge("—", "");
-        }, 2000);
-        
+        setTimeout(() => setPingBadge("—", ""), 2000);
     } catch (error) {
         setPingBadge("Ошибка запроса", "bad2");
-        console.error("Ошибка при отправке запроса фото:", error);
         alert("Ошибка при отправке запроса фото: " + error.message);
     }
 });
@@ -363,16 +390,10 @@ function startClientsRealtime() {
     unsubscribeClients = onSnapshot(collection(db, "pcList"), (snap) => {
         const arr = [];
         snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
-
-        arr.sort((a, b) => {
-            const ap = (a.system?.pcName || a.id || "").toLowerCase();
-            const bp = (b.system?.pcName || b.id || "").toLowerCase();
-            return ap.localeCompare(bp);
-        });
-
         pcDocs = arr;
         renderClients();
         updateStats();
+        renderFolderFilterBtns();
 
         if (selectedClientId) {
             const exists = pcDocs.some(x => x.id === selectedClientId);
@@ -383,6 +404,9 @@ function startClientsRealtime() {
                 updateSelectedClientInfo();
             }
         }
+
+        // refresh folders page if open
+        if (currentPage === "folders") renderFolderPage();
     }, (err) => {
         if (clientsList) {
             clientsList.innerHTML = `<div class="err" style="padding:10px;">Ошибка pcList: ${escapeHtml(err?.message || err)}</div>`;
@@ -399,14 +423,9 @@ function updateStats() {
     if (onlineClients) onlineClients.textContent = online;
     if (offlineClients) offlineClients.textContent = offline;
 
-    // Обновить бейдж в меню
     if (pcCountBadge) {
         pcCountBadge.textContent = total;
-        if (online > 0) {
-            pcCountBadge.className = "badge ok";
-        } else {
-            pcCountBadge.className = "badge";
-        }
+        pcCountBadge.className = online > 0 ? "badge ok" : "badge";
     }
 }
 
@@ -423,29 +442,221 @@ function clientSearchKey(c) {
     ].filter(Boolean).join(" ").toLowerCase();
 }
 
+// ---------- SORT LOGIC ----------
+function getSortedClients(arr) {
+    const sorted = [...arr];
+
+    sorted.sort((a, b) => {
+        let cmp = 0;
+
+        if (sortBy === "date") {
+            const at = tsToDate(a.createdAt || a.system?.registeredAt) || new Date(0);
+            const bt = tsToDate(b.createdAt || b.system?.registeredAt) || new Date(0);
+            // Fallback: compare IDs lexicographically (Firebase IDs are time-ordered)
+            cmp = at.getTime() !== bt.getTime()
+                ? at.getTime() - bt.getTime()
+                : (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+        } else if (sortBy === "name") {
+            const an = (a.system?.pcName || a.id || "").toLowerCase();
+            const bn = (b.system?.pcName || b.id || "").toLowerCase();
+            cmp = an.localeCompare(bn);
+        } else if (sortBy === "online") {
+            const ao = a.online?.pcOnline ?? -1;
+            const bo = b.online?.pcOnline ?? -1;
+            cmp = bo - ao; // online first by default
+        } else if (sortBy === "folder") {
+            const af = a.folderId ? getFolderName(a.folderId) : "zzz";
+            const bf = b.folderId ? getFolderName(b.folderId) : "zzz";
+            cmp = af.localeCompare(bf);
+        }
+
+        return sortDir === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+}
+
+function getFolderName(folderId) {
+    if (!folderId) return "";
+    const f = folderDocs.find(x => x.id === folderId);
+    return f?.name || folderId;
+}
+
+// Sort button handlers
+document.querySelectorAll(".sortBtn[data-sort]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const s = btn.getAttribute("data-sort");
+        if (sortBy === s) {
+            sortDir = sortDir === "asc" ? "desc" : "asc";
+        } else {
+            sortBy = s;
+            sortDir = "desc";
+        }
+        updateSortUI();
+        renderClients();
+    });
+});
+
+sortDirBtn?.addEventListener("click", () => {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+    updateSortUI();
+    renderClients();
+});
+
+function updateSortUI() {
+    document.querySelectorAll(".sortBtn[data-sort]").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-sort") === sortBy);
+    });
+    if (sortDirBtn) {
+        sortDirBtn.innerHTML = sortDir === "asc"
+            ? '<i class="fas fa-sort-amount-up"></i>'
+            : '<i class="fas fa-sort-amount-down"></i>';
+    }
+}
+
+// ---------- FOLDER FILTER ----------
+function renderFolderFilterBtns() {
+    if (!folderFilterBtns) return;
+
+    // Keep fixed buttons, add dynamic ones
+    const dynamicBtns = folderDocs.map(f => {
+        const clientCount = pcDocs.filter(c => c.folderId === f.id).length;
+        return `<button class="sortBtn folderFilterBtn${activeFolderFilter === f.id ? ' active' : ''}" data-folder="${escapeHtml(f.id)}">
+            <i class="fas fa-folder"></i> ${escapeHtml(f.name)} <span style="opacity:.6">(${clientCount})</span>
+        </button>`;
+    }).join("");
+
+    // Reset fixed buttons state
+    const allBtn = folderFilterBtns.querySelector('[data-folder="all"]');
+    const noneBtn = folderFilterBtns.querySelector('[data-folder="__none__"]');
+    if (allBtn) allBtn.classList.toggle("active", activeFolderFilter === "all");
+    if (noneBtn) noneBtn.classList.toggle("active", activeFolderFilter === "__none__");
+
+    // Remove old dynamic buttons, add new
+    folderFilterBtns.querySelectorAll('.folderFilterBtn[data-folder]:not([data-folder="all"]):not([data-folder="__none__"])').forEach(b => b.remove());
+    folderFilterBtns.insertAdjacentHTML("beforeend", dynamicBtns);
+
+    // Bind all folder filter buttons
+    folderFilterBtns.querySelectorAll(".folderFilterBtn").forEach(btn => {
+        btn.onclick = () => {
+            activeFolderFilter = btn.getAttribute("data-folder");
+            renderFolderFilterBtns();
+            renderClients();
+        };
+    });
+}
+
+// ---------- MULTI-SELECT ----------
+btnSelectMode?.addEventListener("click", () => {
+    isSelectMode = !isSelectMode;
+    multiSelected.clear();
+    if (isSelectMode) {
+        btnSelectMode.innerHTML = '<i class="fas fa-times"></i> Отмена';
+        btnSelectMode.classList.add("btnPrimary");
+        multiSelectBar?.classList.remove("hidden");
+    } else {
+        btnSelectMode.innerHTML = '<i class="fas fa-check-square"></i> Выбрать';
+        btnSelectMode.classList.remove("btnPrimary");
+        multiSelectBar?.classList.add("hidden");
+    }
+    updateMultiSelectCount();
+    renderClients();
+});
+
+btnCancelSelect?.addEventListener("click", () => {
+    isSelectMode = false;
+    multiSelected.clear();
+    btnSelectMode.innerHTML = '<i class="fas fa-check-square"></i> Выбрать';
+    btnSelectMode.classList.remove("btnPrimary");
+    multiSelectBar?.classList.add("hidden");
+    renderClients();
+});
+
+function updateMultiSelectCount() {
+    if (multiSelectCount) {
+        multiSelectCount.textContent = `${multiSelected.size} выбрано`;
+    }
+}
+
+function toggleClientSelect(id, el) {
+    if (multiSelected.has(id)) {
+        multiSelected.delete(id);
+        el?.classList.remove("selected");
+    } else {
+        multiSelected.add(id);
+        el?.classList.add("selected");
+    }
+    updateMultiSelectCount();
+}
+
+// Remove from folder (bulk)
+btnRemoveFromFolder?.addEventListener("click", async () => {
+    if (multiSelected.size === 0) { alert("Ничего не выбрано!"); return; }
+    try {
+        const promises = [...multiSelected].map(id =>
+            updateDoc(doc(db, "pcList", id), { folderId: null, folderName: null })
+        );
+        await Promise.all(promises);
+        multiSelected.clear();
+        updateMultiSelectCount();
+        renderClients();
+    } catch (e) {
+        alert("Ошибка: " + (e?.message || e));
+    }
+});
+
+// Move selected to folder button
+btnMoveToFolder?.addEventListener("click", () => {
+    if (multiSelected.size === 0) { alert("Ничего не выбрано!"); return; }
+    openMoveFolderModal([...multiSelected]);
+});
+
+// ---------- RENDER CLIENTS ----------
 function renderClients() {
     if (!clientsList) return;
 
     const q = (searchEl?.value || "").trim().toLowerCase();
-    const filtered = !q ? pcDocs : pcDocs.filter(c => clientSearchKey(c).includes(q));
 
-    if (filtered.length === 0) {
+    let filtered = !q ? pcDocs : pcDocs.filter(c => clientSearchKey(c).includes(q));
+
+    // Apply folder filter
+    if (activeFolderFilter === "__none__") {
+        filtered = filtered.filter(c => !c.folderId);
+    } else if (activeFolderFilter !== "all") {
+        filtered = filtered.filter(c => c.folderId === activeFolderFilter);
+    }
+
+    const sorted = getSortedClients(filtered);
+
+    if (sorted.length === 0) {
         clientsList.innerHTML = `<div class="muted" style="padding:10px;">Ничего не найдено.</div>`;
         return;
     }
 
-    clientsList.innerHTML = filtered.map((c) => {
+    clientsList.innerHTML = sorted.map((c) => {
         const pcName = c.system?.pcName || c.id;
         const user = c.system?.userName ? `@${c.system.userName}` : "—";
         const region = c.system?.region || c.system?.city || "—";
         const ip = c.system?.internetIp || c.system?.localIp || "—";
         const badge = onlineBadge(c.online?.pcOnline);
+        const folderBadge = c.folderId
+            ? `<span class="folderTag"><i class="fas fa-folder"></i> ${escapeHtml(getFolderName(c.folderId))}</span>`
+            : "";
+        const isChecked = multiSelected.has(c.id) ? "selected" : "";
+        const isActive = c.id === selectedClientId && !isSelectMode ? "active" : "";
 
         return `
-      <div class="clientItem ${c.id === selectedClientId ? "active" : ""}" data-id="${escapeHtml(c.id)}">
+      <div class="clientItem ${isActive} ${isChecked}" 
+           data-id="${escapeHtml(c.id)}"
+           draggable="true">
         <div class="clientTop">
+          ${isSelectMode ? `<div class="clientCheckbox ${multiSelected.has(c.id) ? 'checked' : ''}" data-id="${escapeHtml(c.id)}"><i class="fas ${multiSelected.has(c.id) ? 'fa-check-square' : 'fa-square'}"></i></div>` : ''}
           <div class="clientName">${escapeHtml(pcName)}</div>
-          <span class="badge ${badge.cls}">${badge.text}</span>
+          <div class="clientTopRight">
+            ${folderBadge}
+            <span class="badge ${badge.cls}">${badge.text}</span>
+            ${!isSelectMode ? `<button class="clientMoveBtn" data-id="${escapeHtml(c.id)}" title="Переместить в папку"><i class="fas fa-folder-arrow-up"></i></button>` : ''}
+          </div>
         </div>
         <div class="clientMeta">
           <div><b>${escapeHtml(user)}</b> • ${escapeHtml(region)} • ${escapeHtml(c.system?.country || "—")}</div>
@@ -455,8 +666,50 @@ function renderClients() {
     `;
     }).join("");
 
-    document.querySelectorAll(".clientItem").forEach((el) => {
-        el.addEventListener("click", () => selectClient(el.getAttribute("data-id")));
+    // Bind events
+    clientsList.querySelectorAll(".clientItem").forEach((el) => {
+        const id = el.getAttribute("data-id");
+
+        // Click: select or open
+        el.addEventListener("click", (e) => {
+            if (e.target.closest(".clientMoveBtn")) return; // handled separately
+            if (isSelectMode) {
+                toggleClientSelect(id, el);
+            } else {
+                selectClient(id);
+            }
+        });
+
+        // Drag & drop
+        el.addEventListener("dragstart", (e) => {
+            dragClientId = id;
+            el.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", id);
+        });
+        el.addEventListener("dragend", () => {
+            el.classList.remove("dragging");
+            dragClientId = null;
+        });
+    });
+
+    // Move button handler
+    clientsList.querySelectorAll(".clientMoveBtn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute("data-id");
+            openMoveFolderModal([id]);
+        });
+    });
+
+    // Checkbox handler
+    clientsList.querySelectorAll(".clientCheckbox").forEach((el) => {
+        el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = el.getAttribute("data-id");
+            const parentItem = el.closest(".clientItem");
+            toggleClientSelect(id, parentItem);
+        });
     });
 }
 
@@ -476,32 +729,17 @@ function selectClient(id) {
     renderClients();
     updateSelectedClientInfo();
 
-    // Обновить бейджи в меню
     if (selectedPcBadge) {
-        if (id) {
-            selectedPcBadge.textContent = "✓";
-            selectedPcBadge.className = "badge ok";
-        } else {
-            selectedPcBadge.textContent = "—";
-            selectedPcBadge.className = "badge";
-        }
+        if (id) { selectedPcBadge.textContent = "✓"; selectedPcBadge.className = "badge ok"; }
+        else { selectedPcBadge.textContent = "—"; selectedPcBadge.className = "badge"; }
     }
 
-    if (chatBadge) {
-        chatBadge.textContent = "OFF";
-        chatBadge.className = "badge";
-    }
+    if (chatBadge) { chatBadge.textContent = "OFF"; chatBadge.className = "badge"; }
+    if (cmdBadge) { cmdBadge.textContent = "—"; cmdBadge.className = "badge"; }
 
-    if (cmdBadge) {
-        cmdBadge.textContent = "—";
-        cmdBadge.className = "badge";
-    }
-
-    // Сбросить пинг
     setPingBadge("—", "");
     setPingAllBadge("—", "");
 
-    // Обновить текущую страницу
     updatePageContent();
 }
 
@@ -537,103 +775,50 @@ function renderPcInfo() {
 
     const infoCards = [];
 
-    // Основная информация
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Основная информация</div>
-            <div class="infoRow">
-                <span class="infoLabel">ID документа:</span>
-                <span class="infoValue">${escapeHtml(client.id)}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Имя ПК:</span>
-                <span class="infoValue">${escapeHtml(sys.pcName || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Пользователь:</span>
-                <span class="infoValue">${escapeHtml(sys.userName || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Статус:</span>
-                <span class="infoValue">${onlineBadge(online.pcOnline).text}</span>
-            </div>
+            <div class="infoRow"><span class="infoLabel">ID документа:</span><span class="infoValue">${escapeHtml(client.id)}</span></div>
+            <div class="infoRow"><span class="infoLabel">Имя ПК:</span><span class="infoValue">${escapeHtml(sys.pcName || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Пользователь:</span><span class="infoValue">${escapeHtml(sys.userName || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Статус:</span><span class="infoValue">${onlineBadge(online.pcOnline).text}</span></div>
+            <div class="infoRow"><span class="infoLabel">Папка:</span><span class="infoValue">${client.folderId ? escapeHtml(getFolderName(client.folderId)) : "—"}</span></div>
         </div>
     `);
 
-    // Сетевая информация
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Сетевая информация</div>
-            <div class="infoRow">
-                <span class="infoLabel">Внешний IP:</span>
-                <span class="infoValue">${escapeHtml(sys.internetIp || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Локальный IP:</span>
-                <span class="infoValue">${escapeHtml(sys.localIp || "—")}</span>
-            </div>
-           
+            <div class="infoRow"><span class="infoLabel">Внешний IP:</span><span class="infoValue">${escapeHtml(sys.internetIp || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Локальный IP:</span><span class="infoValue">${escapeHtml(sys.localIp || "—")}</span></div>
         </div>
     `);
 
-    // Геолокация
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Геолокация</div>
-            <div class="infoRow">
-                <span class="infoLabel">Страна:</span>
-                <span class="infoValue">${escapeHtml(sys.country || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Регион:</span>
-                <span class="infoValue">${escapeHtml(sys.region || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Город:</span>
-                <span class="infoValue">${escapeHtml(sys.city || "—")}</span>
-            </div>
+            <div class="infoRow"><span class="infoLabel">Страна:</span><span class="infoValue">${escapeHtml(sys.country || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Регион:</span><span class="infoValue">${escapeHtml(sys.region || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Город:</span><span class="infoValue">${escapeHtml(sys.city || "—")}</span></div>
         </div>
     `);
 
-    // Системная информация
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Система</div>
-            <div class="infoRow">
-                <span class="infoLabel">ОС:</span>
-                <span class="infoValue">${escapeHtml(sys.osVersion || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Архитектура:</span>
-                <span class="infoValue">${escapeHtml(sys.architecture || "—")}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">Время работы:</span>
-                <span class="infoValue">${escapeHtml(online.startTime || "—")}</span>
-            </div>
+            <div class="infoRow"><span class="infoLabel">ОС:</span><span class="infoValue">${escapeHtml(sys.osVersion || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Архитектура:</span><span class="infoValue">${escapeHtml(sys.architecture || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Время работы:</span><span class="infoValue">${escapeHtml(online.startTime || "—")}</span></div>
         </div>
     `);
 
-    // Флаги
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Флаги состояния</div>
-            <div class="infoRow">
-                <span class="infoLabel">adminOnline:</span>
-                <span class="infoValue">${client.adminOnline || 0}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">adminOpen:</span>
-                <span class="infoValue">${client.adminOpen || 0}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">clientOnline:</span>
-                <span class="infoValue">${client.clientOnline || 0}</span>
-            </div>
-            <div class="infoRow">
-                <span class="infoLabel">clientOpen:</span>
-                <span class="infoValue">${client.clientOpen || 0}</span>
-            </div>
+            <div class="infoRow"><span class="infoLabel">adminOnline:</span><span class="infoValue">${client.adminOnline || 0}</span></div>
+            <div class="infoRow"><span class="infoLabel">adminOpen:</span><span class="infoValue">${client.adminOpen || 0}</span></div>
+            <div class="infoRow"><span class="infoLabel">clientOnline:</span><span class="infoValue">${client.clientOnline || 0}</span></div>
+            <div class="infoRow"><span class="infoLabel">clientOpen:</span><span class="infoValue">${client.clientOpen || 0}</span></div>
         </div>
     `);
 
@@ -649,9 +834,7 @@ function renderChatPage() {
         if (chatStatus) chatStatus.textContent = "не выбран клиент";
         return;
     }
-
     renderChatHeader();
-
     if (!chatIsOpen) {
         chatInputBar?.classList.add("hidden");
         if (chatBody) chatBody.innerHTML = `<div class="hint">Нажмите <b>Открыть чат</b> для загрузки сообщений</div>`;
@@ -670,15 +853,12 @@ function renderChatHeader() {
     const badge = onlineBadge(client?.online?.pcOnline);
 
     if (chatClientName) chatClientName.textContent = pcName;
-
     if (badgeOnline) {
         badgeOnline.textContent = badge.text;
         badgeOnline.className = `badge ${badge.cls}`;
     }
-
     if (chatClientIdPill) chatClientIdPill.textContent = `pcList/${selectedClientId}`;
 
-    // ✅ pills из system
     const sys = client?.system || {};
     const pills = [];
     if (sys.userName) pills.push(`<span class="pill">@${escapeHtml(sys.userName)}</span>`);
@@ -687,10 +867,7 @@ function renderChatHeader() {
     if (sys.internetIp) pills.push(`<span class="pill">IP: ${escapeHtml(sys.internetIp)}</span>`);
 
     const isMobile = window.innerWidth <= 768;
-    if (isMobile && pills.length > 2) {
-        pills.length = 2;
-        pills.push('<span class="pill">...</span>');
-    }
+    if (isMobile && pills.length > 2) { pills.length = 2; pills.push('<span class="pill">...</span>'); }
 
     if (chatClientMeta) chatClientMeta.innerHTML = pills.join(" ");
 
@@ -713,13 +890,10 @@ function startChatRealtime(clientId) {
 
     unsubscribeChat = onSnapshot(q, (snap) => {
         const stickToBottom = isNearBottom(chatBody);
-
         const msgs = [];
         snap.forEach((d) => msgs.push({ id: d.id, ...d.data() }));
-
         msgs.reverse();
         renderMessages(msgs);
-
         if (stickToBottom) scrollToBottom(chatBody);
     }, (err) => {
         if (chatBody) chatBody.innerHTML = `<div class="err">Ошибка чтения чата: ${escapeHtml(err?.message || err)}</div>`;
@@ -728,26 +902,17 @@ function startChatRealtime(clientId) {
 
 btnOpenChat?.addEventListener("click", async () => {
     if (!selectedClientId) return;
-
     if (chatStatus) chatStatus.textContent = "открываем чат…";
     try {
         await setAdminFlags(selectedClientId, 1);
         chatIsOpen = true;
-
         chatInputBar?.classList.remove("hidden");
         if (chatBody) chatBody.innerHTML = `<div class="muted">Загрузка сообщений…</div>`;
-
         cleanupChatSubscription();
         startChatRealtime(selectedClientId);
-
         if (chatStatus) chatStatus.textContent = "чат открыт";
         msgInput?.focus();
-
-        // Обновить бейдж в меню
-        if (chatBadge) {
-            chatBadge.textContent = "ON";
-            chatBadge.className = "badge ok";
-        }
+        if (chatBadge) { chatBadge.textContent = "ON"; chatBadge.className = "badge ok"; }
     } catch (e) {
         if (chatStatus) chatStatus.textContent = "ошибка";
         alert("Не удалось открыть чат: " + (e?.message || e));
@@ -756,35 +921,25 @@ btnOpenChat?.addEventListener("click", async () => {
 
 btnCloseChat?.addEventListener("click", async () => {
     if (!selectedClientId) return;
-
     if (chatStatus) chatStatus.textContent = "закрываем чат…";
     try {
         await setAdminFlags(selectedClientId, 0);
         chatIsOpen = false;
-
         cleanupChatSubscription();
         chatInputBar?.classList.add("hidden");
         if (chatBody) chatBody.innerHTML = `<div class="hint">Чат закрыт. Нажмите <b>Открыть чат</b> для продолжения.</div>`;
         if (chatStatus) chatStatus.textContent = "чат закрыт";
-
-        // Обновить бейдж в меню
-        if (chatBadge) {
-            chatBadge.textContent = "OFF";
-            chatBadge.className = "badge";
-        }
+        if (chatBadge) { chatBadge.textContent = "OFF"; chatBadge.className = "badge"; }
     } catch (e) {
         if (chatStatus) chatStatus.textContent = "ошибка";
         alert("Не удалось закрыть чат: " + (e?.message || e));
     }
 });
 
-
-
 // ---------- MESSAGES ----------
 function isNearBottom(el) {
     if (!el) return true;
-    const threshold = 80;
-    return (el.scrollHeight - el.scrollTop - el.clientHeight) < threshold;
+    return (el.scrollHeight - el.scrollTop - el.clientHeight) < 80;
 }
 function scrollToBottom(el) {
     if (!el) return;
@@ -801,18 +956,15 @@ function messageSide(msg) {
 
 function renderMessages(msgs) {
     if (!chatBody) return;
-
     if (!msgs || msgs.length === 0) {
         chatBody.innerHTML = `<div class="hint">Сообщений пока нет. Напишите первое сообщение.</div>`;
         return;
     }
-
     chatBody.innerHTML = msgs.map((m) => {
         const sender = m.sender || "Unknown";
         const isMe = messageSide(m) === "me";
         const dt = tsToDate(m.ts);
         const time = dt ? fmtTime.format(dt) : "…";
-
         return `
       <div class="msgRow ${isMe ? "me" : ""}">
         <div class="bubble">
@@ -822,26 +974,22 @@ function renderMessages(msgs) {
           </div>
           <div class="text">${escapeHtml(m.text || "")}</div>
         </div>
-      </div>
-    `;
+      </div>`;
     }).join("");
 }
 
 async function trimMessagesAsync(clientId) {
     if (trimLock) return;
     trimLock = true;
-
     try {
         const chatRef = collection(db, "pcList", clientId, "chatMessages");
         const snap = await getDocs(query(chatRef, orderBy("ts", "asc")));
-
         if (snap.size <= MAX_MESSAGES) return;
-
         const toDelete = snap.size - MAX_MESSAGES;
         let i = 0;
         for (const d of snap.docs) {
             if (i >= toDelete) break;
-            await d.ref.delete();
+            await deleteDoc(d.ref);
             i++;
         }
     } finally {
@@ -851,13 +999,10 @@ async function trimMessagesAsync(clientId) {
 
 async function sendMessage() {
     if (!selectedClientId || !chatIsOpen) return;
-
     const text = (msgInput?.value || "").trim();
     if (!text) return;
-
     if (msgInput) msgInput.value = "";
     msgInput?.focus();
-
     const chatRef = collection(db, "pcList", selectedClientId, "chatMessages");
     await addDoc(chatRef, {
         sender: ADMIN_NAME,
@@ -865,14 +1010,11 @@ async function sendMessage() {
         text,
         ts: serverTimestamp()
     });
-
     await trimMessagesAsync(selectedClientId);
 }
 
 btnSend?.addEventListener("click", sendMessage);
-msgInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
+msgInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
 
 // ---------- PING / PONG ----------
 function setPingBadge(text, cls) {
@@ -890,12 +1032,10 @@ function waitForPong(clientId, token, timeoutMs = PING_TIMEOUT_MS) {
     return new Promise((resolve) => {
         const ref = doc(db, "pcList", clientId);
         const t0 = Date.now();
-
         const unsub = onSnapshot(ref, (snap) => {
             const d = snap.data() || {};
             const online = d.online || {};
             const pong = online.pong;
-
             if (pong && pong === token) {
                 try { unsub(); } catch { }
                 resolve({ ok: true });
@@ -904,11 +1044,7 @@ function waitForPong(clientId, token, timeoutMs = PING_TIMEOUT_MS) {
                 resolve({ ok: false });
             }
         }, () => resolve({ ok: false }));
-
-        setTimeout(() => {
-            try { unsub(); } catch { }
-            resolve({ ok: false });
-        }, timeoutMs + 250);
+        setTimeout(() => { try { unsub(); } catch { } resolve({ ok: false }); }, timeoutMs + 250);
     });
 }
 
@@ -931,18 +1067,11 @@ async function setPcOnlineFlag(clientId, isOnline) {
 
 async function doPing() {
     if (!selectedClientId) return;
-
     const token = randToken();
     setPingBadge("ping…", "wait");
-
     const ref = doc(db, "pcList", selectedClientId);
-    await updateDoc(ref, {
-        "online.ping": token,
-        "online.pingAt": serverTimestamp()
-    });
-
+    await updateDoc(ref, { "online.ping": token, "online.pingAt": serverTimestamp() });
     const res = await waitForPong(selectedClientId, token, PING_TIMEOUT_MS);
-
     if (res.ok) {
         setPingBadge("pong ✅ ONLINE", "good");
         await setPcOnlineFlag(selectedClientId, true);
@@ -953,21 +1082,13 @@ async function doPing() {
 }
 
 btnPing?.addEventListener("click", () => {
-    doPing().catch((e) => {
-        setPingBadge("ошибка ping", "bad2");
-        alert("Ping error: " + (e?.message || e));
-    });
+    doPing().catch((e) => { setPingBadge("ошибка ping", "bad2"); alert("Ping error: " + (e?.message || e)); });
 });
 
 async function pingOnePcSilent(clientId) {
     const token = randToken();
     const ref = doc(db, "pcList", clientId);
-
-    await updateDoc(ref, {
-        "online.ping": token,
-        "online.pingAt": serverTimestamp()
-    });
-
+    await updateDoc(ref, { "online.ping": token, "online.pingAt": serverTimestamp() });
     const res = await waitForPong(clientId, token, PING_TIMEOUT_MS);
     await setPcOnlineFlag(clientId, res.ok);
     return res.ok;
@@ -975,33 +1096,19 @@ async function pingOnePcSilent(clientId) {
 
 async function pingAllClients() {
     const items = pcDocs.map(x => x.id);
-    if (!items || items.length === 0) {
-        setPingAllBadge("Нет элементов", "warn");
-        return;
-    }
-
+    if (!items || items.length === 0) { setPingAllBadge("Нет элементов", "warn"); return; }
     setPingAllBadge(`Пингую ${items.length}...`, "wait");
-
     const tasks = items.map(async (id) => {
-        try {
-            return await pingOnePcSilent(id);
-        } catch {
-            try { await setPcOnlineFlag(id, false); } catch { }
-            return false;
-        }
+        try { return await pingOnePcSilent(id); }
+        catch { try { await setPcOnlineFlag(id, false); } catch { } return false; }
     });
-
     const results = await Promise.all(tasks);
     const onlineCount = results.filter(Boolean).length;
-
     setPingAllBadge(`Онлайн: ${onlineCount} / ${items.length}`, onlineCount > 0 ? "good" : "bad2");
 }
 
 btnPingAll?.addEventListener("click", () => {
-    pingAllClients().catch((e) => {
-        setPingAllBadge("Ошибка при пинге", "bad2");
-        alert("PingAll error: " + (e?.message || e));
-    });
+    pingAllClients().catch((e) => { setPingAllBadge("Ошибка при пинге", "bad2"); alert("PingAll error: " + (e?.message || e)); });
 });
 
 // ---------- COMMAND PAGE ----------
@@ -1011,7 +1118,6 @@ function renderCommandPage() {
         if (cmdOutput) cmdOutput.textContent = "Выберите клиента на странице 'PC List' для отправки команд";
         return;
     }
-
     const pcName = selectedClientData?.system?.pcName || selectedClientId;
     if (cmdClientName) cmdClientName.textContent = pcName;
 }
@@ -1024,32 +1130,26 @@ function setCmdBadge(text, cls) {
 
 function fmtCmdResult(d) {
     if (!d) return "Нет данных (документ command/current отсутствует).";
-
     const lines = [];
     lines.push(`status: ${d.status ?? "—"}`);
     lines.push(`id: ${d.id ?? "—"}`);
     lines.push(`cmd: ${d.cmd ?? "—"}`);
     lines.push(`worker: ${d.worker ?? "—"}`);
     lines.push(`exitCode: ${d.exitCode ?? "—"}`);
-
     const dt = tsToDate(d.ts);
     lines.push(`ts: ${dt ? fmtTime.format(dt) : (d.ts ? String(d.ts) : "—")}`);
-
     lines.push("");
     lines.push("stdout:");
     lines.push(d.stdout ? String(d.stdout) : "");
     lines.push("");
     lines.push("stderr:");
     lines.push(d.stderr ? String(d.stderr) : "");
-
     return lines.join("\n");
 }
 
 function startCommandRealtime(clientId) {
     cleanupCmdSubscription();
-
     const cmdRef = doc(db, "pcList", clientId, "command", "current");
-
     setCmdBadge("ожидание…", "wait");
     if (cmdOutput) cmdOutput.textContent = "Ждём данные от ПК…";
 
@@ -1059,18 +1159,13 @@ function startCommandRealtime(clientId) {
             if (cmdOutput) cmdOutput.textContent = "Документ pcList/{id}/command/current не найден.";
             return;
         }
-
         const d = snap.data() || {};
         const status = String(d.status || "").toLowerCase();
-
         if (status === "done") setCmdBadge("done", "good");
         else if (status === "running") setCmdBadge("running", "wait");
         else if (status === "error") setCmdBadge("error", "bad2");
         else setCmdBadge(d.status || "—", "");
-
         if (cmdOutput) cmdOutput.textContent = fmtCmdResult(d);
-
-        // Обновить бейдж в меню
         if (cmdBadge) {
             cmdBadge.textContent = status.toUpperCase();
             if (status === "done") cmdBadge.className = "badge good";
@@ -1087,34 +1182,18 @@ function startCommandRealtime(clientId) {
 async function sendCommand(clientId, cmdText) {
     const cmdRef = doc(db, "pcList", clientId, "command", "current");
     const id = randToken();
-
-    // ВАЖНО: клиент выполняет ТОЛЬКО если status == "new"
     await setDoc(cmdRef, {
-        id,
-        cmd: cmdText,
-        status: "new",          // ✅ было "running" — теперь "new"
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        ts: serverTimestamp(),
-        worker: ""              // клиент сам поставит _pcKey когда начнёт выполнять
+        id, cmd: cmdText, status: "new",
+        stdout: "", stderr: "", exitCode: 0,
+        ts: serverTimestamp(), worker: ""
     }, { merge: true });
-
     return id;
 }
 
 btnCmdSend?.addEventListener("click", async () => {
-    if (!selectedClientId) {
-        alert("Сначала выберите клиента!");
-        return;
-    }
-
+    if (!selectedClientId) { alert("Сначала выберите клиента!"); return; }
     const text = (cmdInput?.value || "").trim();
-    if (!text) {
-        alert("Введите команду!");
-        return;
-    }
-
+    if (!text) { alert("Введите команду!"); return; }
     try {
         setCmdBadge("отправка…", "wait");
         await sendCommand(selectedClientId, text);
@@ -1128,56 +1207,413 @@ btnCmdSend?.addEventListener("click", async () => {
 });
 
 cmdInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        btnCmdSend?.click();
-    }
+    if (e.key === "Enter") { e.preventDefault(); btnCmdSend?.click(); }
 });
 
 cmdPreset?.addEventListener("change", () => {
     const v = (cmdPreset.value || "").trim();
     if (!v) return;
-
     if (cmdInput) {
         cmdInput.value = v;
         cmdInput.focus();
         cmdInput.setSelectionRange(cmdInput.value.length, cmdInput.value.length);
     }
-
     cmdPreset.value = "";
 });
 
 btnCmdClose?.addEventListener("click", () => {
     if (cmdOutput) cmdOutput.textContent = "Выберите клиента и отправьте команду...";
     setCmdBadge("—", "");
+    if (cmdBadge) { cmdBadge.textContent = "—"; cmdBadge.className = "badge"; }
+});
 
-    if (cmdBadge) {
-        cmdBadge.textContent = "—";
-        cmdBadge.className = "badge";
+// ==========================================================
+// ==================== FOLDERS (FoldSort) ==================
+// ==========================================================
+
+function startFoldersRealtime() {
+    cleanupFoldersSubscription();
+
+    unsubscribeFolders = onSnapshot(collection(db, "FoldSort"), (snap) => {
+        const arr = [];
+        snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
+        // Sort by createdAt
+        arr.sort((a, b) => {
+            const at = tsToDate(a.createdAt) || new Date(0);
+            const bt = tsToDate(b.createdAt) || new Date(0);
+            return at - bt;
+        });
+        folderDocs = arr;
+
+        // Update folder count badges
+        if (foldersBadge) foldersBadge.textContent = folderDocs.length;
+        if (foldersCountBadge) foldersCountBadge.textContent = `${folderDocs.length} папок`;
+
+        renderFolderFilterBtns();
+        if (currentPage === "folders") renderFolderPage();
+    }, (err) => {
+        console.error("FoldSort error:", err);
+    });
+}
+
+// ---- Build folder tree ----
+function buildFolderTree(parentId = null) {
+    return folderDocs
+        .filter(f => (f.parentId || null) === parentId)
+        .map(f => ({ ...f, children: buildFolderTree(f.id) }));
+}
+
+function countClientsInFolder(folderId, includeChildren = true) {
+    let count = pcDocs.filter(c => c.folderId === folderId).length;
+    if (includeChildren) {
+        const children = folderDocs.filter(f => f.parentId === folderId);
+        children.forEach(child => { count += countClientsInFolder(child.id, true); });
+    }
+    return count;
+}
+
+// ---- Render folder tree ----
+function renderFolderTreeHTML(nodes, depth = 0) {
+    if (!nodes || nodes.length === 0) return "";
+    return nodes.map(node => {
+        const isCollapsed = collapsedFolders.has(node.id);
+        const clientCount = countClientsInFolder(node.id, false);
+        const totalCount = countClientsInFolder(node.id, true);
+        const hasChildren = node.children && node.children.length > 0;
+        const isActive = activeFolderPageId === node.id;
+
+        return `
+        <div class="folderNode" data-id="${escapeHtml(node.id)}" style="--depth:${depth}">
+            <div class="folderNodeRow ${isActive ? 'active' : ''}"
+                 data-id="${escapeHtml(node.id)}"
+                 ondragover="event.preventDefault()"
+                 ondrop="handleFolderDrop(event,'${escapeHtml(node.id)}')">
+                <span class="folderToggle ${hasChildren ? '' : 'invisible'}" data-toggle="${escapeHtml(node.id)}">
+                    <i class="fas fa-chevron-${isCollapsed ? 'right' : 'down'}"></i>
+                </span>
+                <i class="fas fa-folder${isActive ? '-open' : ''} folderIcon"></i>
+                <span class="folderNodeName" data-select="${escapeHtml(node.id)}">${escapeHtml(node.name)}</span>
+                <span class="badge folderCountBadge">${clientCount}${totalCount !== clientCount ? '/' + totalCount : ''}</span>
+                <div class="folderActions">
+                    <button class="folderActionBtn" title="Добавить подпапку" data-action="addChild" data-id="${escapeHtml(node.id)}"><i class="fas fa-folder-plus"></i></button>
+                    <button class="folderActionBtn" title="Переименовать" data-action="rename" data-id="${escapeHtml(node.id)}"><i class="fas fa-pen"></i></button>
+                    <button class="folderActionBtn danger" title="Удалить" data-action="delete" data-id="${escapeHtml(node.id)}"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            ${hasChildren && !isCollapsed
+                ? `<div class="folderChildren">${renderFolderTreeHTML(node.children, depth + 1)}</div>`
+                : ''}
+        </div>`;
+    }).join("");
+}
+
+function renderFolderPage() {
+    if (!folderTreeRoot) return;
+
+    const tree = buildFolderTree(null);
+
+    if (tree.length === 0) {
+        folderTreeRoot.innerHTML = `<div class="hint">Нет папок. Нажмите «Создать папку»</div>`;
+    } else {
+        folderTreeRoot.innerHTML = renderFolderTreeHTML(tree);
+        // Bind events
+        folderTreeRoot.querySelectorAll(".folderToggle[data-toggle]").forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const fid = el.getAttribute("data-toggle");
+                if (collapsedFolders.has(fid)) collapsedFolders.delete(fid);
+                else collapsedFolders.add(fid);
+                renderFolderPage();
+            });
+        });
+
+        folderTreeRoot.querySelectorAll(".folderNodeName[data-select]").forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                activeFolderPageId = el.getAttribute("data-select");
+                renderFolderPage();
+                renderFolderClients();
+            });
+        });
+
+        folderTreeRoot.querySelectorAll(".folderActionBtn[data-action]").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                const action = btn.getAttribute("data-action");
+                const fid = btn.getAttribute("data-id");
+                if (action === "addChild") await handleFolderAddChild(fid);
+                else if (action === "rename") await handleFolderRename(fid);
+                else if (action === "delete") await handleFolderDelete(fid);
+            });
+        });
+    }
+
+    // Also render clients panel
+    renderFolderClients();
+}
+
+function renderFolderClients() {
+    if (!folderClientsList) return;
+
+    if (!activeFolderPageId) {
+        if (folderClientsTitle) folderClientsTitle.textContent = "Выберите папку для просмотра клиентов";
+        if (folderClientsCount) folderClientsCount.textContent = "0";
+        folderClientsList.innerHTML = `<div class="hint">Выберите папку</div>`;
+        return;
+    }
+
+    const folder = folderDocs.find(f => f.id === activeFolderPageId);
+    if (!folder) {
+        activeFolderPageId = null;
+        renderFolderClients();
+        return;
+    }
+
+    const clients = pcDocs.filter(c => c.folderId === activeFolderPageId);
+
+    if (folderClientsTitle) folderClientsTitle.textContent = `📁 ${folder.name}`;
+    if (folderClientsCount) folderClientsCount.textContent = clients.length;
+
+    if (clients.length === 0) {
+        folderClientsList.innerHTML = `<div class="hint">Папка пуста. Перетащите клиентов сюда или используйте кнопку «Переместить»</div>`;
+        return;
+    }
+
+    folderClientsList.innerHTML = clients.map(c => {
+        const pcName = c.system?.pcName || c.id;
+        const badge = onlineBadge(c.online?.pcOnline);
+        return `
+        <div class="clientItem" data-id="${escapeHtml(c.id)}">
+            <div class="clientTop">
+                <div class="clientName">${escapeHtml(pcName)}</div>
+                <div class="clientTopRight">
+                    <span class="badge ${badge.cls}">${badge.text}</span>
+                    <button class="clientMoveBtn folderRemoveBtn" data-id="${escapeHtml(c.id)}" title="Убрать из папки">
+                        <i class="fas fa-folder-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="clientMeta">${escapeHtml(c.system?.userName ? '@' + c.system.userName : '—')} • ${escapeHtml(c.system?.internetIp || '—')}</div>
+        </div>`;
+    }).join("");
+
+    // Remove from folder buttons
+    folderClientsList.querySelectorAll(".folderRemoveBtn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute("data-id");
+            try {
+                await updateDoc(doc(db, "pcList", id), { folderId: null, folderName: null });
+            } catch (err) {
+                alert("Ошибка: " + (err?.message || err));
+            }
+        });
+    });
+
+    // Select client on click
+    folderClientsList.querySelectorAll(".clientItem").forEach(el => {
+        el.addEventListener("click", (e) => {
+            if (e.target.closest(".folderRemoveBtn")) return;
+            selectClient(el.getAttribute("data-id"));
+            switchPage("pcList");
+        });
+    });
+}
+
+// ---- Global drag handler for folders ----
+window.handleFolderDrop = async function(event, folderId) {
+    event.preventDefault();
+    const clientId = event.dataTransfer.getData("text/plain") || dragClientId;
+    if (!clientId) return;
+    try {
+        const folder = folderDocs.find(f => f.id === folderId);
+        await updateDoc(doc(db, "pcList", clientId), {
+            folderId,
+            folderName: folder?.name || folderId
+        });
+    } catch (err) {
+        alert("Ошибка перемещения: " + (err?.message || err));
+    }
+};
+
+// ---- Folder CRUD ----
+async function handleFolderAddChild(parentId) {
+    const name = prompt("Название новой подпапки:");
+    if (!name || !name.trim()) return;
+    try {
+        await addDoc(collection(db, "FoldSort"), {
+            name: name.trim(),
+            parentId,
+            createdAt: serverTimestamp()
+        });
+    } catch (e) {
+        alert("Ошибка создания папки: " + (e?.message || e));
+    }
+}
+
+async function handleFolderRename(folderId) {
+    const folder = folderDocs.find(f => f.id === folderId);
+    const newName = prompt("Новое название папки:", folder?.name || "");
+    if (!newName || !newName.trim()) return;
+    try {
+        await updateDoc(doc(db, "FoldSort", folderId), { name: newName.trim() });
+        // Update folderName in all clients of this folder
+        const clients = pcDocs.filter(c => c.folderId === folderId);
+        await Promise.all(clients.map(c =>
+            updateDoc(doc(db, "pcList", c.id), { folderName: newName.trim() })
+        ));
+    } catch (e) {
+        alert("Ошибка переименования: " + (e?.message || e));
+    }
+}
+
+async function handleFolderDelete(folderId) {
+    const folder = folderDocs.find(f => f.id === folderId);
+    const children = folderDocs.filter(f => f.parentId === folderId);
+    const clientsInside = pcDocs.filter(c => c.folderId === folderId);
+
+    let confirmMsg = `Удалить папку "${folder?.name}"?`;
+    if (clientsInside.length > 0) {
+        confirmMsg += `\n\n${clientsInside.length} клиентов будут перемещены в корень.`;
+    }
+    if (children.length > 0) {
+        confirmMsg += `\n\nВнимание: ${children.length} подпапок также будут удалены.`;
+    }
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        // Move clients to root
+        await Promise.all(clientsInside.map(c =>
+            updateDoc(doc(db, "pcList", c.id), { folderId: null, folderName: null })
+        ));
+
+        // Delete children recursively
+        await deleteFolderRecursive(folderId);
+
+        if (activeFolderPageId === folderId) {
+            activeFolderPageId = null;
+        }
+    } catch (e) {
+        alert("Ошибка удаления папки: " + (e?.message || e));
+    }
+}
+
+async function deleteFolderRecursive(folderId) {
+    const children = folderDocs.filter(f => f.parentId === folderId);
+    for (const child of children) {
+        // Move clients in children to root too
+        const childClients = pcDocs.filter(c => c.folderId === child.id);
+        await Promise.all(childClients.map(c =>
+            updateDoc(doc(db, "pcList", c.id), { folderId: null, folderName: null })
+        ));
+        await deleteFolderRecursive(child.id);
+    }
+    await deleteDoc(doc(db, "FoldSort", folderId));
+}
+
+// Create root folder button
+btnCreateRootFolder?.addEventListener("click", async () => {
+    const name = prompt("Название новой папки:");
+    if (!name || !name.trim()) return;
+    try {
+        const newDoc = await addDoc(collection(db, "FoldSort"), {
+            name: name.trim(),
+            parentId: null,
+            createdAt: serverTimestamp()
+        });
+        activeFolderPageId = newDoc.id;
+    } catch (e) {
+        alert("Ошибка создания папки: " + (e?.message || e));
     }
 });
 
-// Адаптация для мобильных
+// ---------- MOVE TO FOLDER MODAL ----------
+let modalTargetIds = []; // client IDs to move
+
+function openMoveFolderModal(clientIds) {
+    if (folderDocs.length === 0) {
+        alert("Сначала создайте папку в разделе «Folders»!");
+        return;
+    }
+    modalTargetIds = clientIds;
+    renderModalFolderList();
+    moveFolderModal?.classList.remove("hidden");
+}
+
+function closeMoveFolderModal() {
+    moveFolderModal?.classList.add("hidden");
+    modalTargetIds = [];
+}
+
+function renderModalFolderList(parentId = null, depth = 0) {
+    if (depth === 0 && modalFolderList) {
+        modalFolderList.innerHTML = "";
+    }
+
+    const children = folderDocs.filter(f => (f.parentId || null) === parentId);
+    children.forEach(folder => {
+        const item = document.createElement("div");
+        item.className = "modalFolderItem";
+        item.style.paddingLeft = `${16 + depth * 20}px`;
+        item.innerHTML = `<i class="fas fa-folder"></i> <span>${escapeHtml(folder.name)}</span>`;
+        item.addEventListener("click", async () => {
+            const idsToMove = [...modalTargetIds]; // сохраняем ДО закрытия
+            closeMoveFolderModal();
+            try {
+                await Promise.all(idsToMove.map(id =>
+                    updateDoc(doc(db, "pcList", id), {
+                        folderId: folder.id,
+                        folderName: folder.name
+                    })
+                ));
+                if (isSelectMode) {
+                    multiSelected.clear();
+                    updateMultiSelectCount();
+                }
+            } catch (e) {
+                alert("Ошибка перемещения: " + (e?.message || e));
+            }
+        });
+        modalFolderList?.appendChild(item);
+        renderModalFolderList(folder.id, depth + 1);
+    });
+}
+
+modalClose?.addEventListener("click", closeMoveFolderModal);
+modalCancel?.addEventListener("click", closeMoveFolderModal);
+moveFolderModal?.addEventListener("click", (e) => {
+    if (e.target === moveFolderModal) closeMoveFolderModal();
+});
+
+modalMoveToRoot?.addEventListener("click", async () => {
+    const idsToMove = [...modalTargetIds]; // сохраняем ДО закрытия
+    closeMoveFolderModal();
+    try {
+        await Promise.all(idsToMove.map(id =>
+            updateDoc(doc(db, "pcList", id), { folderId: null, folderName: null })
+        ));
+        if (isSelectMode) {
+            multiSelected.clear();
+            updateMultiSelectCount();
+        }
+    } catch (e) {
+        alert("Ошибка: " + (e?.message || e));
+    }
+});
+
+// ---------- MISC ----------
 window.addEventListener('resize', function () {
-    if (selectedClientId) {
-        renderChatHeader();
-    }
+    if (selectedClientId) renderChatHeader();
 });
 
-// Предотвращаем масштабирование на мобильных при двойном тапе
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function (event) {
     const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
+    if (now - lastTouchEnd <= 300) event.preventDefault();
     lastTouchEnd = now;
 }, false);
 
-// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function () {
-    // Фокус на поле email при загрузке
     if (emailEl) emailEl.focus();
 });
-
-
