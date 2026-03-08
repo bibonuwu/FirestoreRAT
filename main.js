@@ -60,6 +60,7 @@ const btnRefresh = document.getElementById("btnRefresh");
 // Sidebar elements
 const sidebar = document.querySelector(".sidebar");
 const sidebarToggle = document.getElementById("sidebarToggle");
+const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
 const authError = document.getElementById("authError");
 const meEmail = document.getElementById("meEmail");
@@ -325,7 +326,13 @@ function updatePageContent() {
 menuItems.forEach(item => {
     item.addEventListener("click", () => {
         const page = item.getAttribute("data-page");
-        if (page) switchPage(page);
+        if (page) {
+            switchPage(page);
+            // Close mobile menu after selecting
+            if (window.innerWidth <= 768 && appScreen?.classList.contains("menu-open")) {
+                toggleMobileSidebar();
+            }
+        }
     });
 });
 
@@ -1623,38 +1630,40 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ---------- SIDEBAR TOGGLE ----------
-sidebarToggle?.addEventListener("click", () => {
+// Desktop sidebar collapse
+sidebarToggle?.addEventListener("click", (e) => {
+    e.stopPropagation();
     sidebar?.classList.toggle("collapsed");
     localStorage.setItem("sidebarCollapsed", sidebar?.classList.contains("collapsed"));
 });
 
-// Restore sidebar state
-if (localStorage.getItem("sidebarCollapsed") === "true") {
+// Restore sidebar state on desktop
+if (window.innerWidth > 768 && localStorage.getItem("sidebarCollapsed") === "true") {
     sidebar?.classList.add("collapsed");
 }
 
 // Mobile sidebar toggle
 function toggleMobileSidebar() {
-    sidebar?.classList.toggle("active");
-    document.body.classList.toggle("sidebar-open");
+    appScreen?.classList.toggle("menu-open");
 }
 
-// Close sidebar when clicking outside on mobile
-if (window.innerWidth <= 768) {
-    document.addEventListener("click", (e) => {
-        if (sidebar?.classList.contains("active") &&
-            !sidebar.contains(e.target) &&
-            !e.target.closest(".mobileMenuBtn")) {
+// Mobile menu button click
+mobileMenuBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMobileSidebar();
+});
+
+// Close sidebar when clicking overlay on mobile
+appScreen?.addEventListener("click", (e) => {
+    if (window.innerWidth <= 768 && appScreen.classList.contains("menu-open")) {
+        // Check if click is on overlay (not sidebar or menu button)
+        if (!sidebar?.contains(e.target) && !mobileMenuBtn?.contains(e.target)) {
             toggleMobileSidebar();
         }
-    });
-}
+    }
+});
 
-// Add mobile menu button dynamically
-if (window.innerWidth <= 768) {
-    const mobileBtn = document.createElement("button");
-    mobileBtn.className = "mobileMenuBtn";
-    mobileBtn.innerHTML = '<i class="fas fa-bars"></i>';
-    mobileBtn.addEventListener("click", toggleMobileSidebar);
-    document.body.appendChild(mobileBtn);
-}
+// Prevent closing when clicking inside sidebar
+sidebar?.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
