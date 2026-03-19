@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firestore Chat</title>
-  <script type="text/javascript" src="https://me.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=eoO3k3kQGImDWYldcQtcTCW2iDAy-r29lsZqdl-z0OZNE9x8RPL3VqkpG4SvNtOgGx5AjpySBO52R8-eNwEeMiuZim0EIDNCT_cffy8C6-TcKYQ0G65ogua3cZX4SHE154Afn8P9CbL-_ce6weN7eNQmyNRVRPBIT4PGmgKqh9NFoJTvy5cy6UZiiI46MKDuM2smjLuI7cStMZRKwTyv4s1cqT5aZ90RF28IEkGo3f9heG11pgPp1EEhH0Zeay9Ba7fh1XTENOzFqIiIlLvwxQ" charset="UTF-8"></script><style>
+  <style>
     :root {
       --bg: #0f172a;
       --panel: #111827;
@@ -256,8 +256,8 @@
 <body>
   <div class="wrap">
     <section class="setup" id="setupBox">
-      <h1>Мини чат на Firestore</h1>
-      <p>Этот сайт заменяет <code>ChatWindow.xaml</code> и работает с той же структурой Firestore: <code>pcList/{pcKey}/chatMessages</code>.</p>
+      <h1>Firestore Chat</h1>
+      <p>Введи данные для подключения к чату или используй URL-параметры.</p>
 
       <div class="grid">
         <div>
@@ -282,14 +282,10 @@
       </div>
 
       <div class="note">
-        Для GitHub Pages открой сайт так:<br>
-        <code>?pcKey=PC_...&amp;me=Admin&amp;role=admin</code><br>
-        или<br>
-        <code>?pcKey=PC_...&amp;me=Client&amp;role=client</code>
-      </div>
-
-      <div class="note">
-        Важно: это минимальный вариант. Если сайт будет публичным, любой, у кого есть ссылка, сможет открыть чат. Для нормальной защиты потом добавь Firebase Auth и правила безопасности.
+        Клиент открывается автоматически по ссылке:<br>
+        <code>?pcKey=PC_...&amp;userName=Имя</code> → автоматически role=client<br><br>
+        Админ:<br>
+        <code>?pcKey=PC_...&amp;me=Admin&amp;role=admin</code>
       </div>
     </section>
 
@@ -331,14 +327,15 @@
       onSnapshot
     } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
-    // ===== ВСТАВЬ СВОЙ FIREBASE CONFIG =====
+    // ===== FIREBASE CONFIG =====
     const firebaseConfig = {
-      apiKey: 'PASTE_HERE',
-      authDomain: 'PASTE_HERE',
-      projectId: 'PASTE_HERE',
-      storageBucket: 'PASTE_HERE',
-      messagingSenderId: 'PASTE_HERE',
-      appId: 'PASTE_HERE'
+      apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
+      authDomain: "bibonrat.firebaseapp.com",
+      databaseURL: "https://bibonrat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bibonrat",
+      storageBucket: "bibonrat.firebasestorage.app",
+      messagingSenderId: "78759159251",
+      appId: "1:78759159251:web:3e40d7d5a2aa762f01bb26"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -358,10 +355,19 @@
     const sendBtn = document.getElementById('sendBtn');
     const closedBanner = document.getElementById('closedBanner');
 
+    // ===== ЧТЕНИЕ URL ПАРАМЕТРОВ =====
     const params = new URLSearchParams(location.search);
+
     let pcKey = (params.get('pcKey') || '').trim();
     let me = (params.get('me') || '').trim();
     let role = (params.get('role') || '').trim().toLowerCase();
+
+    // Если пришёл параметр userName (от C# клиента) — автоматически role=client
+    const userNameParam = (params.get('userName') || '').trim();
+    if (userNameParam && pcKey) {
+      if (!me) me = userNameParam;
+      if (!role) role = 'client';
+    }
 
     let lastCount = 0;
     let closedByPeer = false;
@@ -519,8 +525,10 @@
     async function startChat() {
       setupBox.style.display = 'none';
       appBox.style.display = 'grid';
-      chatTitle.textContent = `Chat – ${pcKey} (${me})`;
-      chatSub.textContent = role === 'admin' ? 'Режим: admin' : 'Режим: client';
+      chatTitle.textContent = `Chat – ${pcKey}`;
+      chatSub.textContent = role === 'admin'
+        ? `Режим: admin (${me})`
+        : `Режим: client (${me})`;
 
       const pcDocRef = doc(db, 'pcList', pcKey);
       const messagesColRef = collection(pcDocRef, 'chatMessages');
@@ -536,8 +544,7 @@
         setStatus(peerOnline);
 
         if (role === 'client' && !peerOpen) {
-          showClosed('Админ закрыл чат. Ввод отключен.');
-          try { window.close(); } catch {}
+          showClosed('Админ закрыл чат. Ввод отключён.');
         } else {
           hideClosed();
         }
@@ -581,7 +588,9 @@
     window.addEventListener('pagehide', () => { cleanup(); });
     window.addEventListener('beforeunload', () => { cleanup(); });
 
+    // ===== АВТОЗАПУСК =====
     if (isValid()) {
+      // Параметры в URL валидны — сразу открываем чат
       pcKeyInput.value = pcKey;
       meInput.value = me;
       roleInput.value = role;
@@ -590,6 +599,7 @@
         alert('Не удалось открыть чат. Проверь Firebase config и правила Firestore.');
       });
     } else {
+      // Нет параметров — показываем форму
       setupBox.style.display = 'block';
       appBox.style.display = 'none';
     }
