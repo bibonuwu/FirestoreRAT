@@ -50,6 +50,7 @@
     }
 
     .setup {
+      display: none;
       width: 100%;
       max-width: 560px;
       border: 1px solid var(--line);
@@ -59,32 +60,14 @@
       box-shadow: 0 20px 50px rgba(0,0,0,.35);
     }
 
-    .setup h1, .head h1 {
-      margin: 0 0 8px;
-      font-size: 22px;
-    }
+    .setup h1 { margin: 0 0 8px; font-size: 22px; }
+    .setup p, .sub { color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
 
-    .setup p, .sub {
-      color: var(--muted);
-      margin: 0 0 18px;
-      line-height: 1.5;
-    }
+    .grid { display: grid; gap: 12px; }
 
-    .grid {
-      display: grid;
-      gap: 12px;
-    }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
 
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    input, select, textarea, button {
-      font: inherit;
-    }
+    input, select, textarea, button { font: inherit; }
 
     input, select, textarea {
       width: 100%;
@@ -125,11 +108,7 @@
     }
 
     .titlebox { min-width: 0; }
-    .title {
-      font-size: 20px;
-      font-weight: 700;
-      word-break: break-word;
-    }
+    .title { font-size: 20px; font-weight: 700; word-break: break-word; }
 
     .status {
       padding: 10px 14px;
@@ -154,10 +133,7 @@
         radial-gradient(circle at bottom left, rgba(59,130,246,.08), transparent 28%);
     }
 
-    .msg-row {
-      display: flex;
-    }
-
+    .msg-row { display: flex; }
     .msg-row.mine { justify-content: flex-end; }
     .msg-row.other { justify-content: flex-start; }
 
@@ -182,10 +158,7 @@
       color: rgba(255,255,255,.82);
     }
 
-    .body {
-      white-space: pre-wrap;
-      line-height: 1.45;
-    }
+    .body { white-space: pre-wrap; line-height: 1.45; }
 
     .composer {
       padding: 16px;
@@ -196,18 +169,7 @@
       background: rgba(31, 41, 55, 0.6);
     }
 
-    textarea {
-      min-height: 66px;
-      max-height: 180px;
-      resize: vertical;
-    }
-
-    .note {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
+    textarea { min-height: 66px; max-height: 180px; resize: vertical; }
 
     .banner {
       display: none;
@@ -227,49 +189,29 @@
       line-height: 1.6;
     }
 
-    .mini {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
     @media (max-width: 720px) {
-      .head {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .composer {
-        grid-template-columns: 1fr;
-      }
-
-      .msg {
-        max-width: 92%;
-      }
-
-      .app {
-        min-height: calc(100vh - 40px);
-      }
+      .head { flex-direction: column; align-items: flex-start; }
+      .composer { grid-template-columns: 1fr; }
+      .msg { max-width: 92%; }
+      .app { min-height: calc(100vh - 40px); }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- Форма — только если нет параметров -->
     <section class="setup" id="setupBox">
       <h1>Firestore Chat</h1>
-      <p>Введи данные для подключения к чату или используй URL-параметры.</p>
-
+      <p>Введи данные для подключения.</p>
       <div class="grid">
         <div>
           <label for="pcKeyInput">PC Key</label>
-          <input id="pcKeyInput" placeholder="Например: PC_MYPC_Admin" />
+          <input id="pcKeyInput" placeholder="PC_MYPC_Admin" />
         </div>
-
         <div>
           <label for="meInput">Ваше имя</label>
-          <input id="meInput" placeholder="Например: Admin или Client" />
+          <input id="meInput" placeholder="Admin" />
         </div>
-
         <div>
           <label for="roleInput">Роль</label>
           <select id="roleInput">
@@ -277,18 +219,11 @@
             <option value="client">client</option>
           </select>
         </div>
-
         <button id="openChatBtn">Открыть чат</button>
-      </div>
-
-      <div class="note">
-        Клиент открывается автоматически по ссылке:<br>
-        <code>?pcKey=PC_...&amp;userName=Имя</code> → автоматически role=client<br><br>
-        Админ:<br>
-        <code>?pcKey=PC_...&amp;me=Admin&amp;role=admin</code>
       </div>
     </section>
 
+    <!-- Чат -->
     <section class="app" id="app">
       <header class="head">
         <div class="titlebox">
@@ -304,7 +239,7 @@
       </main>
 
       <footer class="composer">
-        <textarea id="input" placeholder="Напиши сообщение... Enter — отправить, Shift+Enter — новая строка"></textarea>
+        <textarea id="input" placeholder="Enter — отправить, Shift+Enter — новая строка"></textarea>
         <button id="sendBtn">Отправить</button>
       </footer>
     </section>
@@ -313,21 +248,10 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
     import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      getDoc,
-      getDocs,
-      query,
-      orderBy,
-      addDoc,
-      deleteDoc,
-      Timestamp,
-      onSnapshot
+      getFirestore, collection, doc, setDoc, getDocs,
+      query, orderBy, addDoc, deleteDoc, Timestamp, onSnapshot
     } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
-    // ===== FIREBASE CONFIG =====
     const firebaseConfig = {
       apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
       authDomain: "bibonrat.firebaseapp.com",
@@ -341,59 +265,50 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const setupBox = document.getElementById('setupBox');
-    const appBox = document.getElementById('app');
-    const pcKeyInput = document.getElementById('pcKeyInput');
-    const meInput = document.getElementById('meInput');
-    const roleInput = document.getElementById('roleInput');
-    const openChatBtn = document.getElementById('openChatBtn');
-    const chatTitle = document.getElementById('chatTitle');
-    const chatSub = document.getElementById('chatSub');
-    const peerStatus = document.getElementById('peerStatus');
-    const msgs = document.getElementById('msgs');
-    const input = document.getElementById('input');
-    const sendBtn = document.getElementById('sendBtn');
+    const setupBox     = document.getElementById('setupBox');
+    const appBox       = document.getElementById('app');
+    const pcKeyInput   = document.getElementById('pcKeyInput');
+    const meInput      = document.getElementById('meInput');
+    const roleInput    = document.getElementById('roleInput');
+    const openChatBtn  = document.getElementById('openChatBtn');
+    const chatTitle    = document.getElementById('chatTitle');
+    const chatSub      = document.getElementById('chatSub');
+    const peerStatus   = document.getElementById('peerStatus');
+    const msgs         = document.getElementById('msgs');
+    const input        = document.getElementById('input');
+    const sendBtn      = document.getElementById('sendBtn');
     const closedBanner = document.getElementById('closedBanner');
 
-    // ===== ЧТЕНИЕ URL ПАРАМЕТРОВ =====
+    // ===== ПАРАМЕТРЫ ИЗ URL =====
     const params = new URLSearchParams(location.search);
 
     let pcKey = (params.get('pcKey') || '').trim();
-    let me = (params.get('me') || '').trim();
-    let role = (params.get('role') || '').trim().toLowerCase();
+    let me    = (params.get('me') || '').trim();
+    let role  = (params.get('role') || '').trim().toLowerCase();
 
-    // Если пришёл параметр userName (от C# клиента) — автоматически role=client
+    // C# клиент шлёт ?pcKey=XXX&userName=YYY → авто role=client
     const userNameParam = (params.get('userName') || '').trim();
     if (userNameParam && pcKey) {
       if (!me) me = userNameParam;
       if (!role) role = 'client';
     }
 
-    let lastCount = 0;
-    let closedByPeer = false;
-    let unsubDoc = null;
-    let unsubMsgs = null;
+    let lastCount = 0, closedByPeer = false, unsubDoc = null, unsubMsgs = null;
 
+    // Кнопка формы
     openChatBtn.addEventListener('click', () => {
-      const nextPcKey = pcKeyInput.value.trim();
-      const nextMe = meInput.value.trim();
-      const nextRole = roleInput.value.trim();
-
-      if (!nextPcKey || !nextMe || !nextRole) {
-        alert('Заполни PC Key, имя и роль.');
-        return;
-      }
-
+      const p = pcKeyInput.value.trim();
+      const m = meInput.value.trim();
+      const r = roleInput.value.trim();
+      if (!p || !m || !r) { alert('Заполни все поля.'); return; }
       const url = new URL(location.href);
-      url.searchParams.set('pcKey', nextPcKey);
-      url.searchParams.set('me', nextMe);
-      url.searchParams.set('role', nextRole);
+      url.searchParams.set('pcKey', p);
+      url.searchParams.set('me', m);
+      url.searchParams.set('role', r);
       location.href = url.toString();
     });
 
-    function isValid() {
-      return pcKey && me && (role === 'admin' || role === 'client');
-    }
+    function isValid() { return pcKey && me && (role === 'admin' || role === 'client'); }
 
     function getOwnFields() {
       return role === 'admin'
@@ -407,13 +322,9 @@
         : { online: 'adminOnline', open: 'adminOpen' };
     }
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    function esc(v) {
+      return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     function fmtTime(ts) {
@@ -421,185 +332,107 @@
         if (!ts) return '';
         const d = ts.toDate ? ts.toDate() : new Date(ts);
         return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-      } catch {
-        return '';
-      }
+      } catch { return ''; }
     }
 
-    function setStatus(peerOnline) {
-      peerStatus.textContent = peerOnline ? 'собеседник онлайн' : 'собеседник офлайн';
-      peerStatus.classList.toggle('ok', peerOnline);
-      peerStatus.classList.toggle('offline', !peerOnline);
-      document.title = `Chat – ${pcKey} (${me}) — ${peerStatus.textContent}`;
+    function setStatus(on) {
+      peerStatus.textContent = on ? 'собеседник онлайн' : 'собеседник офлайн';
+      peerStatus.classList.toggle('ok', on);
+      peerStatus.classList.toggle('offline', !on);
     }
 
-    function setComposerEnabled(enabled) {
-      input.disabled = !enabled;
-      sendBtn.disabled = !enabled;
-    }
-
-    function showClosed(text) {
+    function showClosed(t) {
       closedByPeer = true;
-      setComposerEnabled(false);
+      input.disabled = true; sendBtn.disabled = true;
       closedBanner.style.display = 'block';
-      closedBanner.textContent = text;
+      closedBanner.textContent = t;
     }
 
     function hideClosed() {
       closedByPeer = false;
       closedBanner.style.display = 'none';
-      closedBanner.textContent = '';
-      setComposerEnabled(true);
+      input.disabled = false; sendBtn.disabled = false;
     }
 
-    function renderMessages(list) {
-      if (!list.length) {
-        msgs.innerHTML = '<div class="empty">Сообщений пока нет.</div>';
-        lastCount = 0;
-        return;
-      }
-
+    function render(list) {
+      if (!list.length) { msgs.innerHTML = '<div class="empty">Сообщений пока нет.</div>'; lastCount = 0; return; }
       msgs.innerHTML = list.map(m => {
         const mine = m.sender.toLowerCase() === me.toLowerCase();
-        return `
-          <div class="msg-row ${mine ? 'mine' : 'other'}">
-            <div class="msg">
-              <div class="meta">
-                <strong>${escapeHtml(m.sender)}</strong>
-                <span>${escapeHtml(m.time)}</span>
-              </div>
-              <div class="body">${escapeHtml(m.body)}</div>
-            </div>
-          </div>
-        `;
+        return `<div class="msg-row ${mine?'mine':'other'}"><div class="msg">
+          <div class="meta"><strong>${esc(m.sender)}</strong><span>${esc(m.time)}</span></div>
+          <div class="body">${esc(m.body)}</div></div></div>`;
       }).join('');
-
-      if (list.length > lastCount) {
-        lastCount = list.length;
-        msgs.scrollTop = msgs.scrollHeight;
-      }
+      if (list.length > lastCount) { lastCount = list.length; msgs.scrollTop = msgs.scrollHeight; }
     }
 
-    async function trimMessages(messagesColRef) {
-      const maxMessages = 6;
-      const snap = await getDocs(query(messagesColRef, orderBy('ts')));
-      if (snap.size <= maxMessages) return;
-
-      const docs = snap.docs;
-      const toDelete = docs.length - maxMessages;
-      for (let i = 0; i < toDelete; i++) {
-        await deleteDoc(docs[i].ref);
-      }
+    async function trim(col) {
+      const s = await getDocs(query(col, orderBy('ts')));
+      if (s.size <= 6) return;
+      for (let i = 0; i < s.docs.length - 6; i++) await deleteDoc(s.docs[i].ref);
     }
 
-    async function sendMessage(messagesColRef) {
-      const text = input.value.trim();
-      if (!text || closedByPeer) return;
-
+    async function send(col) {
+      const t = input.value.trim();
+      if (!t || closedByPeer) return;
       input.value = '';
-
-      await addDoc(messagesColRef, {
-        sender: me,
-        text,
-        ts: Timestamp.now()
-      });
-
-      await trimMessages(messagesColRef);
+      await addDoc(col, { sender: me, text: t, ts: Timestamp.now() });
+      await trim(col);
     }
 
-    async function markPresence(valueOnline, valueOpen) {
+    async function presence(valOn, valOpen) {
       if (!isValid()) return;
-      const pcDocRef = doc(db, 'pcList', pcKey);
       const own = getOwnFields();
-
       try {
-        await setDoc(pcDocRef, {
-          [own.online]: valueOnline,
-          [own.open]: valueOpen
-        }, { merge: true });
-      } catch (e) {
-        console.error('Presence update failed', e);
-      }
+        await setDoc(doc(db, 'pcList', pcKey), { [own.online]: valOn, [own.open]: valOpen }, { merge: true });
+      } catch (e) { console.error(e); }
     }
 
     async function startChat() {
       setupBox.style.display = 'none';
       appBox.style.display = 'grid';
       chatTitle.textContent = `Chat – ${pcKey}`;
-      chatSub.textContent = role === 'admin'
-        ? `Режим: admin (${me})`
-        : `Режим: client (${me})`;
+      chatSub.textContent = `${role} (${me})`;
+      document.title = `Chat – ${pcKey} (${me})`;
 
-      const pcDocRef = doc(db, 'pcList', pcKey);
-      const messagesColRef = collection(pcDocRef, 'chatMessages');
+      const pcRef = doc(db, 'pcList', pcKey);
+      const msgCol = collection(pcRef, 'chatMessages');
 
-      await markPresence(1, 1);
+      await presence(1, 1);
 
-      unsubDoc = onSnapshot(pcDocRef, (snap) => {
-        const data = snap.exists() ? snap.data() : {};
-        const peer = getPeerFields();
-        const peerOnline = Number(data?.[peer.online] || 0) === 1;
-        const peerOpen = Number(data?.[peer.open] || 0) === 1;
-
-        setStatus(peerOnline);
-
-        if (role === 'client' && !peerOpen) {
-          showClosed('Админ закрыл чат. Ввод отключён.');
-        } else {
-          hideClosed();
-        }
-      }, (err) => {
-        console.error('Doc listener error', err);
+      unsubDoc = onSnapshot(pcRef, snap => {
+        const d = snap.exists() ? snap.data() : {};
+        const p = getPeerFields();
+        setStatus(Number(d?.[p.online] || 0) === 1);
+        if (role === 'client' && Number(d?.[p.open] || 0) !== 1) showClosed('Админ закрыл чат.');
+        else hideClosed();
       });
 
-      unsubMsgs = onSnapshot(query(messagesColRef, orderBy('ts')), (snap) => {
-        const list = snap.docs.map(d => {
-          const data = d.data() || {};
-          return {
-            sender: data.sender || '',
-            body: data.text || '',
-            time: fmtTime(data.ts)
-          };
-        });
-
-        renderMessages(list);
-      }, (err) => {
-        console.error('Messages listener error', err);
+      unsubMsgs = onSnapshot(query(msgCol, orderBy('ts')), snap => {
+        render(snap.docs.map(d => {
+          const x = d.data() || {};
+          return { sender: x.sender || '', body: x.text || '', time: fmtTime(x.ts) };
+        }));
       });
 
-      sendBtn.addEventListener('click', async () => {
-        try { await sendMessage(messagesColRef); } catch (e) { console.error(e); }
-      });
-
-      input.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          try { await sendMessage(messagesColRef); } catch (err) { console.error(err); }
-        }
-      });
+      sendBtn.onclick = async () => { try { await send(msgCol); } catch(e) { console.error(e); } };
+      input.onkeydown = async e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); try { await send(msgCol); } catch(e) { console.error(e); } }
+      };
     }
 
     async function cleanup() {
-      try { if (unsubDoc) unsubDoc(); } catch {}
-      try { if (unsubMsgs) unsubMsgs(); } catch {}
-      try { await markPresence(0, 0); } catch {}
+      try { unsubDoc?.(); } catch {}
+      try { unsubMsgs?.(); } catch {}
+      try { await presence(0, 0); } catch {}
     }
 
-    window.addEventListener('pagehide', () => { cleanup(); });
-    window.addEventListener('beforeunload', () => { cleanup(); });
+    window.addEventListener('pagehide', cleanup);
+    window.addEventListener('beforeunload', cleanup);
 
-    // ===== АВТОЗАПУСК =====
+    // ===== СТАРТ =====
     if (isValid()) {
-      // Параметры в URL валидны — сразу открываем чат
-      pcKeyInput.value = pcKey;
-      meInput.value = me;
-      roleInput.value = role;
-      startChat().catch(err => {
-        console.error(err);
-        alert('Не удалось открыть чат. Проверь Firebase config и правила Firestore.');
-      });
+      startChat().catch(e => { console.error(e); alert('Ошибка Firestore.'); });
     } else {
-      // Нет параметров — показываем форму
       setupBox.style.display = 'block';
       appBox.style.display = 'none';
     }
