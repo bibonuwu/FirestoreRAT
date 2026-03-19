@@ -152,6 +152,27 @@ button:active {
     animation: pulse 2s infinite;
 }
 
+.btnScreenshot {
+    background: linear-gradient(135deg, rgba(255,165,0,.25), rgba(255,80,0,.2));
+    border-color: #ff9500;
+    box-shadow: 0 0 10px rgba(255,150,0,.5);
+    font-size: 14px;
+    padding: 8px 18px;
+    animation: pulseScreenshot 2s infinite;
+    order: -1;
+}
+
+.btnScreenshot:hover {
+    border-color: #ffb800;
+    box-shadow: 0 0 20px rgba(255,150,0,.8), 0 0 30px rgba(255,100,0,.4);
+    text-shadow: 0 0 10px #ff9500;
+}
+
+@keyframes pulseScreenshot {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,150,0,.5); }
+    50% { box-shadow: 0 0 20px rgba(255,150,0,.8), 0 0 30px rgba(255,100,0,.4); }
+}
+
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 10px rgba(0,255,65,.5); }
     50% { box-shadow: 0 0 20px rgba(0,255,65,.8), 0 0 30px rgba(0,255,65,.4); }
@@ -259,29 +280,85 @@ button:active {
     display: flex;
     flex-direction: column;
     position: relative;
-    transition: width 0.3s ease;
+    transition: width 0.3s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);
     box-shadow: 0 0 40px rgba(0,255,65,.2);
+    z-index: 100;
+    flex-shrink: 0;
 }
 
 .sidebar.collapsed {
-    width: 70px;
+    width: 0;
+    min-width: 0;
+    border-right-width: 0;
+    overflow: hidden;
 }
 
 .sidebar.collapsed .menuText,
 .sidebar.collapsed .logoText,
 .sidebar.collapsed .menuSectionTitle {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebar.collapsed .menuItem,
 .sidebar.collapsed .menuItemStatic {
     justify-content: center;
+    opacity: 0;
 }
 
 .sidebar.collapsed .menuItem .badge {
     position: absolute;
     right: 5px;
     top: 5px;
+}
+
+.sidebar.collapsed .sidebarHeader,
+.sidebar.collapsed .sidebarFooter {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Sidebar expand toggle - always visible */
+.sidebarExpandBtn {
+    position: fixed;
+    left: 280px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    min-height: 56px;
+    background: rgba(0,0,0,.95);
+    border: 2px solid var(--ok);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    color: var(--ok);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+    transition: left 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.2s;
+    box-shadow: 0 0 15px rgba(0,255,65,.3);
+    padding: 0;
+    font-size: 14px;
+}
+
+.sidebarExpandBtn:hover {
+    box-shadow: 0 0 25px rgba(0,255,65,.6);
+    background: rgba(0,255,65,.1);
+}
+
+.sidebarExpandBtn i {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed ~ .sidebarExpandBtn,
+.app.sidebar-collapsed .sidebarExpandBtn {
+    left: 0;
+}
+
+.app.sidebar-collapsed .sidebarExpandBtn i {
+    transform: rotate(180deg);
 }
 
 /* Sidebar Header */
@@ -433,6 +510,7 @@ button:active {
     gap: 16px;
     overflow: hidden;
     background: linear-gradient(135deg, rgba(0,20,40,.3) 0%, rgba(0,0,0,.2) 100%);
+    transition: margin-left 0.3s cubic-bezier(.4,0,.2,1);
 }
 
 .contentSection {
@@ -596,8 +674,6 @@ button:active {
     color: var(--ok);
     box-shadow: 0 0 15px rgba(0,255,65,.5);
 }
-
-.sortDir { min-width: 36px; justify-content: center; }
 
 /* Multi-Select Bar */
 .multiSelectBar {
@@ -1364,15 +1440,22 @@ button:active {
         height: 100vh;
     }
 
+    .sidebarExpandBtn {
+        display: none !important;
+    }
+
     .sidebar {
         position: fixed;
         left: 0;
         top: 0;
         bottom: 0;
+        width: 280px;
         z-index: 1000;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         box-shadow: 0 0 60px rgba(0,255,65,.4);
+        border-right-width: 2px;
+        overflow: visible;
     }
 
     .sidebar.active {
@@ -1381,6 +1464,27 @@ button:active {
 
     .sidebar.collapsed {
         width: 280px;
+        overflow: visible;
+        border-right-width: 2px;
+    }
+
+    .sidebar.collapsed .menuText,
+    .sidebar.collapsed .logoText,
+    .sidebar.collapsed .menuSectionTitle {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .sidebar.collapsed .menuItem,
+    .sidebar.collapsed .menuItemStatic {
+        justify-content: flex-start;
+        opacity: 1;
+    }
+
+    .sidebar.collapsed .sidebarHeader,
+    .sidebar.collapsed .sidebarFooter {
+        opacity: 1;
+        pointer-events: auto;
     }
 
     .mainContent {

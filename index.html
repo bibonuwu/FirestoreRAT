@@ -103,6 +103,11 @@
             </div>
         </div>
 
+        <!-- Sidebar Expand/Collapse Button -->
+        <button id="sidebarExpandBtn" class="sidebarExpandBtn" title="Свернуть/Развернуть меню">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
         <!-- MAIN CONTENT -->
         <div class="mainContent">
             <!-- PC List Page -->
@@ -151,8 +156,6 @@
                                     Дата</button>
                                 <button class="sortBtn" data-sort="online"><i class="fas fa-circle"></i> Онлайн</button>
                                 <button class="sortBtn" data-sort="folder"><i class="fas fa-folder"></i> Папка</button>
-                                <button id="sortDirBtn" class="sortBtn sortDir" title="Направление сортировки"><i
-                                        class="fas fa-sort-amount-down"></i></button>
                             </div>
                         </div>
 
@@ -224,11 +227,11 @@
                         <div class="chatHeaderRight">
                             <span class="pill" id="chatClientIdPill"></span>
                             <div class="row">
+                                <button id="btnGetPhoto" class="btnScreenshot" title="Сделать скриншот"><i class="fas fa-camera"></i> Скриншот</button>
                                 <button id="btnPing">Пинг</button>
                                 <span id="pingStatus" class="badge">—</span>
                                 <button id="btnOpenChat" class="btnPrimary">Открыть чат</button>
                                 <button id="btnCloseChat">Закрыть чат</button>
-                                <button id="btnGetPhoto">Get Photo</button>
                             </div>
                         </div>
                     </div>

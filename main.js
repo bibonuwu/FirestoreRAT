@@ -90,7 +90,6 @@ const onlineClients = document.getElementById("onlineClients");
 const offlineClients = document.getElementById("offlineClients");
 
 // Sort & Filter
-const sortDirBtn = document.getElementById("sortDirBtn");
 const folderFilterBtns = document.getElementById("folderFilterBtns");
 
 // Multi-select
@@ -375,12 +374,10 @@ btnLogout?.addEventListener("click", async () => {
 // ---------- PHOTO ----------
 btnGetPhoto?.addEventListener("click", async () => {
     if (!selectedClientId) { alert("Выберите клиента!"); return; }
+    const opt = document.querySelector('#cmdPreset option[value*="screen.png"]');
+    if (!opt) { alert("Шаблон скриншота не найден!"); return; }
     try {
-        const ref = doc(db, "pcList", selectedClientId);
-        await updateDoc(ref, {
-            photoRequest: 1,
-            photoRequestTime: serverTimestamp()
-        });
+        await sendCommand(selectedClientId, opt.value);
         setPingBadge("Запрос фото отправлен", "good");
         setTimeout(() => setPingBadge("—", ""), 2000);
     } catch (error) {
@@ -508,21 +505,10 @@ document.querySelectorAll(".sortBtn[data-sort]").forEach(btn => {
     });
 });
 
-sortDirBtn?.addEventListener("click", () => {
-    sortDir = sortDir === "asc" ? "desc" : "asc";
-    updateSortUI();
-    renderClients();
-});
-
 function updateSortUI() {
     document.querySelectorAll(".sortBtn[data-sort]").forEach(btn => {
         btn.classList.toggle("active", btn.getAttribute("data-sort") === sortBy);
     });
-    if (sortDirBtn) {
-        sortDirBtn.innerHTML = sortDir === "asc"
-            ? '<i class="fas fa-sort-amount-up"></i>'
-            : '<i class="fas fa-sort-amount-down"></i>';
-    }
 }
 
 // ---------- FOLDER FILTER ----------
@@ -817,8 +803,11 @@ function renderPcInfo() {
     infoCards.push(`
         <div class="infoCard">
             <div class="infoCardTitle">Система</div>
-            <div class="infoRow"><span class="infoLabel">ОС:</span><span class="infoValue">${escapeHtml(sys.osVersion || "—")}</span></div>
-            <div class="infoRow"><span class="infoLabel">Архитектура:</span><span class="infoValue">${escapeHtml(sys.architecture || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">ОС:</span><span class="infoValue">${escapeHtml(sys.osName || sys.osVersion || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Сборка:</span><span class="infoValue">${escapeHtml(sys.osBuild || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Архитектура ОС:</span><span class="infoValue">${escapeHtml(sys.osArchitecture || sys.architecture || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Архитектура процесса:</span><span class="infoValue">${escapeHtml(sys.processArchitecture || "—")}</span></div>
+            <div class="infoRow"><span class="infoLabel">Фреймворк:</span><span class="infoValue">${escapeHtml(sys.framework || "—")}</span></div>
             <div class="infoRow"><span class="infoLabel">Время работы:</span><span class="infoValue">${escapeHtml(online.startTime || "—")}</span></div>
         </div>
     `);
@@ -1630,16 +1619,29 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ---------- SIDEBAR TOGGLE ----------
-// Desktop sidebar collapse
+const sidebarExpandBtn = document.getElementById("sidebarExpandBtn");
+
+function toggleSidebar() {
+    sidebar?.classList.toggle("collapsed");
+    appScreen?.classList.toggle("sidebar-collapsed");
+    localStorage.setItem("sidebarCollapsed", sidebar?.classList.contains("collapsed"));
+}
+
+// Desktop sidebar collapse — both buttons
 sidebarToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
-    sidebar?.classList.toggle("collapsed");
-    localStorage.setItem("sidebarCollapsed", sidebar?.classList.contains("collapsed"));
+    toggleSidebar();
+});
+
+sidebarExpandBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleSidebar();
 });
 
 // Restore sidebar state on desktop
 if (window.innerWidth > 768 && localStorage.getItem("sidebarCollapsed") === "true") {
     sidebar?.classList.add("collapsed");
+    appScreen?.classList.add("sidebar-collapsed");
 }
 
 // Mobile sidebar toggle
@@ -1667,3 +1669,37 @@ appScreen?.addEventListener("click", (e) => {
 sidebar?.addEventListener("click", (e) => {
     e.stopPropagation();
 });
+
+// ---------- SWIPE GESTURES ----------
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+document.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+}, { passive: true });
+
+document.addEventListener("touchend", (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+
+    // Swipe must be: horizontal > 60px, more horizontal than vertical, under 400ms
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7 || dt > 400) return;
+
+    const menuOpen = appScreen?.classList.contains("menu-open");
+
+    if (dx > 0 && !menuOpen) {
+        // Swipe right — open menu (only if started from left edge, within 40px)
+        if (touchStartX < 40) {
+            toggleMobileSidebar();
+        }
+    } else if (dx < 0 && menuOpen) {
+        // Swipe left — close menu
+        toggleMobileSidebar();
+    }
+}, { passive: true });
