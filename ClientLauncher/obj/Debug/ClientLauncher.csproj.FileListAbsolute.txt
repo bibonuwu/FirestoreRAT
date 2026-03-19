@@ -1,7 +1,0 @@
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\bin\Debug\ClientLauncher.exe.config
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\bin\Debug\ClientLauncher.exe
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\bin\Debug\ClientLauncher.pdb
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\obj\Debug\ClientLauncher.csproj.AssemblyReference.cache
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\obj\Debug\ClientLauncher.csproj.CoreCompileInputs.cache
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\obj\Debug\ClientLauncher.exe
-C:\Users\bibonk\Desktop\FirestoreRAT\ClientLauncher\obj\Debug\ClientLauncher.pdb

