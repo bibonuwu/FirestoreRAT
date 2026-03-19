@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firestore Chat</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --line: #374151;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #2563eb;
+      --mine: #1d4ed8;
+      --other: #374151;
+      --danger: #dc2626;
+      --ok: #16a34a;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020, #111827);
+      color: var(--text);
+    }
+
+    .wrap {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 980px;
+      min-height: 680px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(17, 24, 39, 0.96);
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      display: none;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .setup {
+      display: none;
+      width: 100%;
+      max-width: 560px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.96);
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+
+    .setup h1 { margin: 0 0 8px; font-size: 22px; }
+    .setup p, .sub { color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
+
+    .grid { display: grid; gap: 12px; }
+
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+    input, select, textarea, button { font: inherit; }
+
+    input, select, textarea {
+      width: 100%;
+      background: #0b1220;
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .18);
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      background: rgba(31, 41, 55, 0.6);
+    }
+
+    .titlebox { min-width: 0; }
+    .title { font-size: 20px; font-weight: 700; word-break: break-word; }
+
+    .status {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: #0b1220;
+    }
+
+    .status.ok { color: #86efac; }
+    .status.offline { color: #fca5a5; }
+
+    .msgs {
+      padding: 18px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.14), transparent 25%),
+        radial-gradient(circle at bottom left, rgba(59,130,246,.08), transparent 28%);
+    }
+
+    .msg-row { display: flex; }
+    .msg-row.mine { justify-content: flex-end; }
+    .msg-row.other { justify-content: flex-start; }
+
+    .msg {
+      max-width: min(78%, 620px);
+      padding: 12px 14px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.06);
+      word-break: break-word;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+
+    .mine .msg { background: var(--mine); }
+    .other .msg { background: var(--other); }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,.82);
+    }
+
+    .body { white-space: pre-wrap; line-height: 1.45; }
+
+    .composer {
+      padding: 16px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      background: rgba(31, 41, 55, 0.6);
+    }
+
+    textarea { min-height: 66px; max-height: 180px; resize: vertical; }
+
+    .banner {
+      display: none;
+      margin: 14px 18px 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(220, 38, 38, .35);
+      background: rgba(127, 29, 29, .22);
+      color: #fecaca;
+    }
+
+    .empty {
+      margin: auto;
+      color: var(--muted);
+      text-align: center;
+      padding: 30px 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 720px) {
+      .head { flex-direction: column; align-items: flex-start; }
+      .composer { grid-template-columns: 1fr; }
+      .msg { max-width: 92%; }
+      .app { min-height: calc(100vh - 40px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Форма — только если нет параметров -->
+    <section class="setup" id="setupBox">
+      <h1>Firestore Chat</h1>
+      <p>Введи данные для подключения.</p>
+      <div class="grid">
+        <div>
+          <label for="pcKeyInput">PC Key</label>
+          <input id="pcKeyInput" placeholder="PC_MYPC_Admin" />
+        </div>
+        <div>
+          <label for="meInput">Ваше имя</label>
+          <input id="meInput" placeholder="Admin" />
+        </div>
+        <div>
+          <label for="roleInput">Роль</label>
+          <select id="roleInput">
+            <option value="admin">admin</option>
+            <option value="client">client</option>
+          </select>
+        </div>
+        <button id="openChatBtn">Открыть чат</button>
+      </div>
+    </section>
+
+    <!-- Чат -->
+    <section class="app" id="app">
+      <header class="head">
+        <div class="titlebox">
+          <div class="title" id="chatTitle">Chat</div>
+          <div class="sub" id="chatSub"></div>
+        </div>
+        <div class="status offline" id="peerStatus">собеседник офлайн</div>
+      </header>
+
+      <div class="banner" id="closedBanner"></div>
+      <main class="msgs" id="msgs">
+        <div class="empty">Сообщений пока нет.</div>
+      </main>
+
+      <footer class="composer">
+        <textarea id="input" placeholder="Enter — отправить, Shift+Enter — новая строка"></textarea>
+        <button id="sendBtn">Отправить</button>
+      </footer>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+    import {
+      getFirestore, collection, doc, setDoc, getDocs,
+      query, orderBy, addDoc, deleteDoc, Timestamp, onSnapshot
+    } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
+      authDomain: "bibonrat.firebaseapp.com",
+      databaseURL: "https://bibonrat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bibonrat",
+      storageBucket: "bibonrat.firebasestorage.app",
+      messagingSenderId: "78759159251",
+      appId: "1:78759159251:web:3e40d7d5a2aa762f01bb26"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const setupBox     = document.getElementById('setupBox');
+    const appBox       = document.getElementById('app');
+    const pcKeyInput   = document.getElementById('pcKeyInput');
+    const meInput      = document.getElementById('meInput');
+    const roleInput    = document.getElementById('roleInput');
+    const openChatBtn  = document.getElementById('openChatBtn');
+    const chatTitle    = document.getElementById('chatTitle');
+    const chatSub      = document.getElementById('chatSub');
+    const peerStatus   = document.getElementById('peerStatus');
+    const msgs         = document.getElementById('msgs');
+    const input        = document.getElementById('input');
+    const sendBtn      = document.getElementById('sendBtn');
+    const closedBanner = document.getElementById('closedBanner');
+
+    // ===== ПАРАМЕТРЫ ИЗ URL =====
+    const params = new URLSearchParams(location.search);
+
+    let pcKey = (params.get('pcKey') || '').trim();
+    let me    = (params.get('me') || '').trim();
+    let role  = (params.get('role') || '').trim().toLowerCase();
+
+    // C# клиент шлёт ?pcKey=XXX&userName=YYY → авто role=client
+    const userNameParam = (params.get('userName') || '').trim();
+    if (userNameParam && pcKey) {
+      if (!me) me = userNameParam;
+      if (!role) role = 'client';
+    }
+
+    let lastCount = 0, closedByPeer = false, unsubDoc = null, unsubMsgs = null;
+
+    // Кнопка формы
+    openChatBtn.addEventListener('click', () => {
+      const p = pcKeyInput.value.trim();
+      const m = meInput.value.trim();
+      const r = roleInput.value.trim();
+      if (!p || !m || !r) { alert('Заполни все поля.'); return; }
+      const url = new URL(location.href);
+      url.searchParams.set('pcKey', p);
+      url.searchParams.set('me', m);
+      url.searchParams.set('role', r);
+      location.href = url.toString();
+    });
+
+    function isValid() { return pcKey && me && (role === 'admin' || role === 'client'); }
+
+    function getOwnFields() {
+      return role === 'admin'
+        ? { online: 'adminOnline', open: 'adminOpen' }
+        : { online: 'clientOnline', open: 'clientOpen' };
+    }
+
+    function getPeerFields() {
+      return role === 'admin'
+        ? { online: 'clientOnline', open: 'clientOpen' }
+        : { online: 'adminOnline', open: 'adminOpen' };
+    }
+
+    function esc(v) {
+      return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function fmtTime(ts) {
+      try {
+        if (!ts) return '';
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      } catch { return ''; }
+    }
+
+    function setStatus(on) {
+      peerStatus.textContent = on ? 'собеседник онлайн' : 'собеседник офлайн';
+      peerStatus.classList.toggle('ok', on);
+      peerStatus.classList.toggle('offline', !on);
+    }
+
+    async function showClosed(t) {
+      if (closedByPeer) return; // уже обработали
+      closedByPeer = true;
+      input.disabled = true; sendBtn.disabled = true;
+
+      // Отписываемся и ставим offline
+      try { if (unsubDoc) unsubDoc(); } catch {}
+      try { if (unsubMsgs) unsubMsgs(); } catch {}
+      try { await presence(0, 0); } catch {}
+
+      // Пробуем закрыть вкладку
+      try { window.close(); } catch {}
+
+      // Если не закрылось — показываем полноэкранный оверлей
+      setTimeout(() => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;';
+        overlay.innerHTML = `
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-size:22px;font-weight:700;color:#fca5a5;">${esc(t)}</div>
+          <div style="color:#9ca3af;font-size:15px;">Можешь закрыть эту вкладку.</div>
+        `;
+        document.body.appendChild(overlay);
+      }, 300);
+    }
+
+    function hideClosed() {
+      closedByPeer = false;
+      closedBanner.style.display = 'none';
+      input.disabled = false; sendBtn.disabled = false;
+    }
+
+    function render(list) {
+      if (!list.length) { msgs.innerHTML = '<div class="empty">Сообщений пока нет.</div>'; lastCount = 0; return; }
+      msgs.innerHTML = list.map(m => {
+        const mine = m.sender.toLowerCase() === me.toLowerCase();
+        return `<div class="msg-row ${mine?'mine':'other'}"><div class="msg">
+          <div class="meta"><strong>${esc(m.sender)}</strong><span>${esc(m.time)}</span></div>
+          <div class="body">${esc(m.body)}</div></div></div>`;
+      }).join('');
+      if (list.length > lastCount) { lastCount = list.length; msgs.scrollTop = msgs.scrollHeight; }
+    }
+
+    async function trim(col) {
+      const s = await getDocs(query(col, orderBy('ts')));
+      if (s.size <= 6) return;
+      for (let i = 0; i < s.docs.length - 6; i++) await deleteDoc(s.docs[i].ref);
+    }
+
+    async function send(col) {
+      const t = input.value.trim();
+      if (!t || closedByPeer) return;
+      input.value = '';
+      await addDoc(col, { sender: me, text: t, ts: Timestamp.now() });
+      await trim(col);
+    }
+
+    async function presence(valOn, valOpen) {
+      if (!isValid()) return;
+      const own = getOwnFields();
+      try {
+        await setDoc(doc(db, 'pcList', pcKey), { [own.online]: valOn, [own.open]: valOpen }, { merge: true });
+      } catch (e) { console.error(e); }
+    }
+
+    async function startChat() {
+      setupBox.style.display = 'none';
+      appBox.style.display = 'grid';
+      chatTitle.textContent = `Chat – ${pcKey}`;
+      chatSub.textContent = `${role} (${me})`;
+      document.title = `Chat – ${pcKey} (${me})`;
+
+      const pcRef = doc(db, 'pcList', pcKey);
+      const msgCol = collection(pcRef, 'chatMessages');
+
+      await presence(1, 1);
+
+      unsubDoc = onSnapshot(pcRef, snap => {
+        const d = snap.exists() ? snap.data() : {};
+        const p = getPeerFields();
+        setStatus(Number(d?.[p.online] || 0) === 1);
+        if (role === 'client' && Number(d?.[p.open] || 0) !== 1) showClosed('Админ закрыл чат.');
+        else hideClosed();
+      });
+
+      unsubMsgs = onSnapshot(query(msgCol, orderBy('ts')), snap => {
+        render(snap.docs.map(d => {
+          const x = d.data() || {};
+          return { sender: x.sender || '', body: x.text || '', time: fmtTime(x.ts) };
+        }));
+      });
+
+      sendBtn.onclick = async () => { try { await send(msgCol); } catch(e) { console.error(e); } };
+      input.onkeydown = async e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); try { await send(msgCol); } catch(e) { console.error(e); } }
+      };
+    }
+
+    async function cleanup() {
+      try { unsubDoc?.(); } catch {}
+      try { unsubMsgs?.(); } catch {}
+      try { await presence(0, 0); } catch {}
+    }
+
+    window.addEventListener('pagehide', cleanup);
+    window.addEventListener('beforeunload', cleanup);
+
+    // ===== СТАРТ =====
+    if (isValid()) {
+      startChat().catch(e => { console.error(e); alert('Ошибка Firestore.'); });
+    } else {
+      setupBox.style.display = 'block';
+      appBox.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
