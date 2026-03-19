@@ -341,11 +341,30 @@
       peerStatus.classList.toggle('offline', !on);
     }
 
-    function showClosed(t) {
+    async function showClosed(t) {
+      if (closedByPeer) return; // уже обработали
       closedByPeer = true;
       input.disabled = true; sendBtn.disabled = true;
-      closedBanner.style.display = 'block';
-      closedBanner.textContent = t;
+
+      // Отписываемся и ставим offline
+      try { if (unsubDoc) unsubDoc(); } catch {}
+      try { if (unsubMsgs) unsubMsgs(); } catch {}
+      try { await presence(0, 0); } catch {}
+
+      // Пробуем закрыть вкладку
+      try { window.close(); } catch {}
+
+      // Если не закрылось — показываем полноэкранный оверлей
+      setTimeout(() => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;';
+        overlay.innerHTML = `
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-size:22px;font-weight:700;color:#fca5a5;">${esc(t)}</div>
+          <div style="color:#9ca3af;font-size:15px;">Можешь закрыть эту вкладку.</div>
+        `;
+        document.body.appendChild(overlay);
+      }, 300);
     }
 
     function hideClosed() {
